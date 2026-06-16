@@ -1,0 +1,47 @@
+{
+    "project_info": {
+        "project_number": "617840242417",
+        "project_id": "ai-prompt-generator-app-701fe",
+        "storage_bucket": "ai-prompt-generator-app-701fe.firebasestorage.app"
+    },
+    "client": [
+        {
+            "client_info": {
+                "mobilesdk_app_id": "1:617840242417:android:95b152b16d1808131ec350",
+                "android_client_info": {
+                    "package_name": "com.aipromptgenerater.aitricker"
+                }
+            },
+            "oauth_client": [
+                {
+                    "client_id": "617840242417-a6gkljjg7n3u1dtv3jk9n1ejm42vcpo9.apps.googleusercontent.com",
+                    "client_type": 1,
+                    "android_info": {
+                        "package_name": "com.aipromptgenerater.aitricker",
+                        "certificate_hash": "c8be42ba9fb5545cd29881b817706f1cbc969e88"
+                    }
+                },
+                {
+                    "client_id": "617840242417-h0p6gsavbq4buluomi4atdt0uqdigq4f.apps.googleusercontent.com",
+                    "client_type": 3
+                }
+            ],
+            "api_key": [
+                {
+                    "current_key": "AIzaSyC_fZ6jVe4kbUXgk8td738S9cOZjliIF88"
+                }
+            ],
+            "services": {
+                "appinvite_service": {
+                    "other_platform_oauth_client": [
+                        {
+                            "client_id": "617840242417-h0p6gsavbq4buluomi4atdt0uqdigq4f.apps.googleusercontent.com",
+                            "client_type": 3
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "configuration_version": "1"
+}

@@ -1,0 +1,61 @@
+rules_version = '2';
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Helper to check if the authenticated user is an administrator.
+    // Supports checks by email address (e.g. admin@aiprompt.com) or a database role attribute.
+    function isAdmin() {
+      return request.auth != null && (
+        request.auth.token.email == 'admin@aiprompt.com' ||
+        (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
+         get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
+      );
+    }
+    
+    // User profile rules: users can only read and manage their own profile, admins can read all and update credits
+    match /users/{userId} {
+      allow read: if request.auth != null && (request.auth.uid == userId || isAdmin());
+      
+      // Allow initial profile generation during sign-up with exactly 15 credits
+      allow create: if request.auth != null 
+        && request.auth.uid == userId 
+        && request.resource.data.credits == 15;
+      
+      // Protect credits: user updates can only decrement credits by exactly 5 (prompt generation fee)
+      // or make changes to other fields while maintaining the credit count.
+      // Admins are bypassed and can set any credit amount.
+      allow update: if request.auth != null && (
+        isAdmin() || 
+        (
+          request.auth.uid == userId && 
+          (
+            request.resource.data.credits == resource.data.credits - 5 ||
+            request.resource.data.credits == resource.data.credits
+          )
+        )
+      );
+    }
+    
+    // Prompts rules: users can only read/write their own prompt history, admins can read all
+    match /prompts/{promptId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      
+      // Create is only allowed if the user simultaneously decrements credits on their profile document
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.credits == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.credits - 5;
+    }
+
+    // Dynamic configuration/pricing config (read-only for normal users, read/write for admins)
+    match /config/{configId} {
+      allow read: if request.auth != null;
+      allow write: if isAdmin();
+    }
+
+    // Payment receipts: users can read their own payment logs, admins can read all
+    match /receipts/{receiptId} {
+      allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
+      allow create: if false; // Fulfilling payments must occur via secure Cloud Function or verified Sandbox API transaction
+    }
+  }
+}
