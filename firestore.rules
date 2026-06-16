@@ -3,10 +3,11 @@ service cloud.firestore {
   match /databases/{database}/documents {
     
     // Helper to check if the authenticated user is an administrator.
-    // Supports checks by email address (e.g. admin@aiprompt.com) or a database role attribute.
+    // Supports checks by email address (e.g. admin@aiprompt.com or poorandewangan35@gmail.com) or a database role attribute.
     function isAdmin() {
       return request.auth != null && (
         request.auth.token.email == 'admin@aiprompt.com' ||
+        request.auth.token.email == 'poorandewangan35@gmail.com' ||
         (exists(/databases/$(database)/documents/users/$(request.auth.uid)) && 
          get(/databases/$(database)/documents/users/$(request.auth.uid)).data.role == 'admin')
       );
