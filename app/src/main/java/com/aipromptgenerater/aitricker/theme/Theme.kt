@@ -1,6 +1,7 @@
 package com.aipromptgenerater.aitricker.theme
 
 import android.app.Activity
+import android.content.Context
 import android.os.Build
 import androidx.compose.foundation.isSystemInDarkTheme
 import androidx.compose.material3.MaterialTheme
@@ -10,6 +11,9 @@ import androidx.compose.material3.dynamicLightColorScheme
 import androidx.compose.material3.lightColorScheme
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.SideEffect
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.setValue
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalView
@@ -35,9 +39,26 @@ private val LightColorScheme = lightColorScheme(
     onSurface = LightOnSurface
 )
 
+
+object ThemeManager {
+    var isDarkTheme by mutableStateOf(true)
+
+    fun initialize(context: Context) {
+        val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        isDarkTheme = prefs.getBoolean("is_dark", true)
+    }
+
+    fun toggleTheme(context: Context) {
+        val prefs = context.getSharedPreferences("app_prefs", Context.MODE_PRIVATE)
+        val newValue = !isDarkTheme
+        isDarkTheme = newValue
+        prefs.edit().putBoolean("is_dark", newValue).apply()
+    }
+}
+
 @Composable
 fun AiPromptGeneraterAppBuilderTheme(
-    darkTheme: Boolean = isSystemInDarkTheme(),
+    darkTheme: Boolean = ThemeManager.isDarkTheme,
     dynamicColor: Boolean = false, // Set to false to enforce our premium brand palette instead of generic system colors
     content: @Composable () -> Unit
 ) {

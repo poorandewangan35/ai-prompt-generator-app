@@ -25,6 +25,8 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aipromptgenerater.aitricker.data.model.PromptHistory
 import com.aipromptgenerater.aitricker.ui.components.PremiumCard
+import androidx.compose.ui.platform.LocalContext
+import com.aipromptgenerater.aitricker.theme.ThemeManager
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -48,6 +50,14 @@ fun HomeScreen(
                     )
                 },
                 actions = {
+                    val context = LocalContext.current
+                    IconButton(onClick = { ThemeManager.toggleTheme(context) }) {
+                        Icon(
+                            imageVector = if (ThemeManager.isDarkTheme) Icons.Default.WbSunny else Icons.Default.NightsStay,
+                            contentDescription = "Toggle Theme",
+                            tint = MaterialTheme.colorScheme.primary
+                        )
+                    }
                     IconButton(onClick = { viewModel.logout() }) {
                         Icon(
                             imageVector = Icons.Default.ExitToApp,
