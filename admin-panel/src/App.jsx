@@ -6,13 +6,14 @@ import DashboardView from "./views/DashboardView";
 import PromptsView from "./views/PromptsView";
 import PricingView from "./views/PricingView";
 import UsersView from "./views/UsersView";
-import { LayoutDashboard, FileSliders, Settings, Users, LogOut } from "lucide-react";
+import { LayoutDashboard, FileSliders, Settings, Users, LogOut, Sun, Moon } from "lucide-react";
 import "./App.css";
 
 export default function App() {
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [activeTab, setActiveTab] = useState("dashboard"); // dashboard, prompts, pricing, users
+  const [theme, setTheme] = useState(localStorage.getItem("theme") || "dark");
 
   useEffect(() => {
     const unsubscribe = onAuthStateChanged(auth, (firebaseUser) => {
@@ -21,6 +22,19 @@ export default function App() {
     });
     return () => unsubscribe();
   }, []);
+
+  useEffect(() => {
+    if (theme === "light") {
+      document.body.classList.add("light-mode");
+    } else {
+      document.body.classList.remove("light-mode");
+    }
+    localStorage.setItem("theme", theme);
+  }, [theme]);
+
+  const toggleTheme = () => {
+    setTheme(prev => (prev === "dark" ? "light" : "dark"));
+  };
 
   const handleLogout = () => {
     signOut(auth);
@@ -52,6 +66,22 @@ export default function App() {
       <aside className="sidebar">
         <div>
           <div className="sidebar-logo">Prompt Architect</div>
+          
+          {/* Theme Toggle Button */}
+          <div className="theme-toggle-btn" onClick={toggleTheme}>
+            {theme === "dark" ? (
+              <>
+                <Sun size={18} style={{ color: "#fbbf24" }} />
+                <span>Light Mode</span>
+              </>
+            ) : (
+              <>
+                <Moon size={18} style={{ color: "#60a5fa" }} />
+                <span>Dark Mode</span>
+              </>
+            )}
+          </div>
+
           <ul className="sidebar-menu">
             <li>
               <div 
