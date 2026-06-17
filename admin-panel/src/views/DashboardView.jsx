@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { collection, onSnapshot, query, orderBy, limit } from "firebase/firestore";
+import { collection, onSnapshot, query, orderBy, limit, doc } from "firebase/firestore";
 import { db } from "../firebase";
 import { Users, FileText, ShoppingCart, Activity, ShieldCheck, ShieldAlert } from "lucide-react";
 
@@ -24,12 +24,11 @@ export default function DashboardView() {
       setReceiptCount(snapshot.size);
     });
 
-    // Check Gemini API key configuration status
-    const unsubscribeConfig = onSnapshot(collection(db, "config"), (snapshot) => {
-      const systemDoc = snapshot.docs.find(d => d.id === "system");
-      if (systemDoc && systemDoc.exists()) {
-        const key = systemDoc.data().geminiApiKey;
-        setApiKeyConfigured(key && key.startsWith("AIzaSy") && key.length > 15);
+    // Check Gemini API key configuration status directly on the system document
+    const unsubscribeConfig = onSnapshot(doc(db, "config", "system"), (docSnap) => {
+      if (docSnap.exists()) {
+        const key = docSnap.data().geminiApiKey;
+        setApiKeyConfigured(key && typeof key === "string" && key.trim().length > 10);
       } else {
         setApiKeyConfigured(false);
       }
