@@ -16,7 +16,7 @@ lifecycleViewmodelNav3 = "2.10.0"
 googleServices = "4.4.2"
 firebaseBom = "34.14.0"
 playServicesAuth = "21.2.0"
-cashfree = "2.4.0"
+razorpay = "1.6.38"
 
 [libraries]
 androidx-core-ktx = { module = "androidx.core:core-ktx", version.ref = "androidxCore" }
@@ -51,8 +51,8 @@ firebase-config = { group = "com.google.firebase", name = "firebase-config" }
 # Play Services
 play-services-auth = { module = "com.google.android.gms:play-services-auth", version.ref = "playServicesAuth" }
 
-# Cashfree PG
-cashfree-pg = { module = "com.cashfree.pg:api", version.ref = "cashfree" }
+# Razorpay SDK
+razorpay-checkout = { module = "com.razorpay:checkout", version.ref = "razorpay" }
 
 # Compose Icons
 androidx-compose-material-icons-core = { group = "androidx.compose.material", name = "material-icons-core" }

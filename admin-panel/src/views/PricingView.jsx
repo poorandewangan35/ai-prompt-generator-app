@@ -6,6 +6,8 @@ export default function PricingView() {
   const [priceBasic, setPriceBasic] = useState(99);
   const [pricePopular, setPricePopular] = useState(299);
   const [pricePremium, setPricePremium] = useState(499);
+  const [razorpayKeySandbox, setRazorpayKeySandbox] = useState("");
+  const [razorpayKeyProduction, setRazorpayKeyProduction] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -20,9 +22,11 @@ export default function PricingView() {
           setPriceBasic(data.pricePlanBasic ?? 99);
           setPricePopular(data.pricePlanPopular ?? 299);
           setPricePremium(data.pricePlanPremium ?? 499);
+          setRazorpayKeySandbox(data.razorpayKeyIdSandbox ?? "");
+          setRazorpayKeyProduction(data.razorpayKeyIdProduction ?? "");
         }
       } catch (err) {
-        console.error("Failed to load pricing config", err);
+        console.error("Failed to load pricing and payment config", err);
       } finally {
         setLoading(false);
       }
@@ -46,7 +50,9 @@ export default function PricingView() {
         ...currentData,
         pricePlanBasic: Number(priceBasic),
         pricePlanPopular: Number(pricePopular),
-        pricePlanPremium: Number(pricePremium)
+        pricePlanPremium: Number(pricePremium),
+        razorpayKeyIdSandbox: razorpayKeySandbox,
+        razorpayKeyIdProduction: razorpayKeyProduction
       });
 
       setSuccess(true);
@@ -62,7 +68,7 @@ export default function PricingView() {
   if (loading) {
     return (
       <div style={{ display: "flex", justifyContent: "center", padding: "80px" }}>
-        <p>Loading pricing configuration...</p>
+        <p>Loading configuration...</p>
       </div>
     );
   }
@@ -70,12 +76,12 @@ export default function PricingView() {
   return (
     <div>
       <div className="view-header">
-        <h1>Pricing Tier Manager</h1>
-        <p>Dynamically update pricing rates and package definitions for the Mobile Credit Store</p>
+        <h1>System Settings Manager</h1>
+        <p>Dynamically update pricing rates, packages, and payment gateway keys for the Mobile Credit Store</p>
       </div>
 
       <form onSubmit={handleSave} className="config-container">
-        {success && <div className="success-banner">Pricing configuration updated successfully!</div>}
+        {success && <div className="success-banner">System configuration updated successfully!</div>}
 
         <div className="glass-card">
           <h2 className="card-title">Active Pricing Packages</h2>
@@ -115,12 +121,38 @@ export default function PricingView() {
               min="1"
             />
           </div>
+        </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
-            <button type="submit" className="btn-primary" disabled={saving}>
-              {saving ? "Updating pricing..." : "Save Pricing Packages"}
-            </button>
+        <div className="glass-card" style={{ marginTop: "24px" }}>
+          <h2 className="card-title">Razorpay Gateway Configurations</h2>
+          
+          <div className="form-group">
+            <label>Razorpay Key ID (Sandbox / Test Mode)</label>
+            <input
+              type="text"
+              className="form-control"
+              value={razorpayKeySandbox}
+              onChange={(e) => setRazorpayKeySandbox(e.target.value)}
+              placeholder="rzp_test_xxxxxxxxxxxxxx"
+            />
           </div>
+
+          <div className="form-group">
+            <label>Razorpay Key ID (Production / Live Mode)</label>
+            <input
+              type="text"
+              className="form-control"
+              value={razorpayKeyProduction}
+              onChange={(e) => setRazorpayKeyProduction(e.target.value)}
+              placeholder="rzp_live_xxxxxxxxxxxxxx"
+            />
+          </div>
+        </div>
+
+        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
+          <button type="submit" className="btn-primary" disabled={saving}>
+            {saving ? "Updating config..." : "Save Settings"}
+          </button>
         </div>
       </form>
     </div>

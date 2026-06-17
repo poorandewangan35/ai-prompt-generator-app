@@ -93,8 +93,8 @@ dependencies {
   // Google Play Services Auth
   implementation(libs.play.services.auth)
 
-  // Cashfree PG SDK
-  implementation(libs.cashfree.pg)
+  // Razorpay SDK
+  implementation(libs.razorpay.checkout)
 
   // Compose Icons
   implementation(libs.androidx.compose.material.icons.core)

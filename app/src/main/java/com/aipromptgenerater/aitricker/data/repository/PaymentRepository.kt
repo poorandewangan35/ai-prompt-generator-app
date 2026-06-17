@@ -1,18 +1,19 @@
 package com.aipromptgenerater.aitricker.data.repository
 
+import android.app.Activity
 import android.content.Context
 import android.util.Log
 import com.aipromptgenerater.aitricker.data.model.SystemConfig
-import com.aipromptgenerater.aitricker.data.remote.CashfreeClient
-import com.cashfree.pg.core.api.callback.CFCheckoutResponseCallback
-import com.cashfree.pg.core.api.utils.CFErrorResponse
+import com.aipromptgenerater.aitricker.data.remote.RazorpayClient
+import com.aipromptgenerater.aitricker.data.remote.RazorpayResultBridge
+import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
 class PaymentRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val cashfreeClient: CashfreeClient = CashfreeClient()
+    private val razorpayClient: RazorpayClient = RazorpayClient()
 ) {
 
     companion object {
@@ -54,7 +55,7 @@ class PaymentRepository(
     }
 
     /**
-     * Initializes Cashfree checkout.
+     * Initializes Razorpay checkout.
      * Launches payment screen on sandbox/production environment.
      */
     suspend fun checkout(
@@ -66,42 +67,45 @@ class PaymentRepository(
         onFailure: (String) -> Unit
     ) {
         try {
-            // 1. Create order token via backend simulation or actual server call
-            val orderDetails = if (isSandboxMode) {
-                cashfreeClient.createOrderMock(plan.price.toDouble(), plan.credits)
-            } else {
-                // Call server URL setup
-                val prodOrder = cashfreeClient.createOrderProduction(
-                    backendUrl = "https://your-backend-api.com/create-order",
-                    amount = plan.price.toDouble(),
-                    userId = userId
-                )
-                if (prodOrder.isFailure) {
-                    onFailure(prodOrder.exceptionOrNull()?.message ?: "Backend failed to create Cashfree order")
-                    return
-                }
-                prodOrder.getOrThrow()
+            val activity = context as? Activity
+            if (activity == null) {
+                onFailure("Context is not an Activity. Cannot open Razorpay Checkout.")
+                return
             }
 
-            // 2. Launch checkout
-            cashfreeClient.startPayment(
-                context = context,
-                orderId = orderDetails.orderId,
-                paymentSessionId = orderDetails.paymentSessionId,
-                isSandbox = isSandboxMode,
-                callback = object : CFCheckoutResponseCallback {
-                    override fun onPaymentVerify(orderId: String) {
-                        Log.i(TAG, "Cashfree payment verify event for: $orderId")
-                        // In local test environment, we call the secure verification simulation
-                        // In production, your backend webhook or payment API handles verification
-                        verifyAndFulfillPayment(userId, orderId, plan.credits, onSuccess, onFailure)
-                    }
+            // 1. Fetch Key ID configurations dynamically from Firestore config
+            val systemConfig = loadSystemConfig()
+            val razorpayKeyId = if (isSandboxMode) {
+                systemConfig.razorpayKeyIdSandbox
+            } else {
+                systemConfig.razorpayKeyIdProduction
+            }
 
-                    override fun onPaymentFailure(cfErrorResponse: CFErrorResponse, orderId: String) {
-                        Log.w(TAG, "Cashfree payment failed for: $orderId. ${cfErrorResponse.message}")
-                        onFailure(cfErrorResponse.message ?: "Payment was cancelled or failed.")
-                    }
-                }
+            // Fetch user info from Firebase Auth
+            val firebaseUser = FirebaseAuth.getInstance().currentUser
+            val email = firebaseUser?.email ?: "user@aiprompt.com"
+            val phone = firebaseUser?.phoneNumber ?: "9999999999"
+
+            // 2. Setup SDK callback bridges
+            RazorpayResultBridge.onSuccess = { paymentId ->
+                Log.i(TAG, "Razorpay payment success event for: $paymentId")
+                verifyAndFulfillPayment(userId, paymentId, plan.credits, onSuccess, onFailure)
+            }
+
+            RazorpayResultBridge.onFailure = { code, response ->
+                Log.w(TAG, "Razorpay payment failed. Code: $code, Response: $response")
+                onFailure(response)
+            }
+
+            // 3. Launch Razorpay Standard Checkout
+            razorpayClient.startPayment(
+                activity = activity,
+                keyId = razorpayKeyId,
+                amount = plan.price.toDouble(),
+                credits = plan.credits,
+                planLabel = plan.label,
+                userEmail = email,
+                userPhone = phone
             )
 
         } catch (e: Exception) {
@@ -131,7 +135,8 @@ class PaymentRepository(
             "userId" to userId,
             "creditsPurchased" to creditsToAdd,
             "timestamp" to System.currentTimeMillis(),
-            "status" to "SUCCESS"
+            "status" to "SUCCESS",
+            "gateway" to "Razorpay"
         )
 
         // Write receipt and update user's credits atomically in a Firestore Transaction

@@ -44,7 +44,7 @@ class WalletViewModel(
     }
 
     /**
-     * Launches checkout via Cashfree PG SDK.
+     * Launches checkout via Razorpay SDK.
      */
     fun purchasePlan(context: Context, plan: PaymentPlan, isSandbox: Boolean) {
         val user = currentUser.value

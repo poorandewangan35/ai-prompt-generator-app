@@ -77,7 +77,7 @@ fun WalletScreen(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Opening Cashfree Secure Gateway...",
+                            text = "Opening Razorpay Secure Gateway...",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -127,7 +127,7 @@ fun WalletScreen(
                                     fontSize = 14.sp
                                 )
                                 Text(
-                                    text = "Simulates Cashfree gateway checkouts and adds credits immediately without charging real money.",
+                                    text = "Simulates Razorpay gateway checkouts using test API keys, adding credits immediately.",
                                     fontSize = 11.sp,
                                     lineHeight = 15.sp,
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
