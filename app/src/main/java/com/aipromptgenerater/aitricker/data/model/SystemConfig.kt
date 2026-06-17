@@ -9,5 +9,7 @@ data class SystemConfig(
     @get:PropertyName("pricePlanPopular") @set:PropertyName("pricePlanPopular") var pricePlanPopular: Int = 299,
     @get:PropertyName("pricePlanPremium") @set:PropertyName("pricePlanPremium") var pricePlanPremium: Int = 499,
     @get:PropertyName("razorpayKeyIdSandbox") @set:PropertyName("razorpayKeyIdSandbox") var razorpayKeyIdSandbox: String = "rzp_test_your_sandbox_key",
-    @get:PropertyName("razorpayKeyIdProduction") @set:PropertyName("razorpayKeyIdProduction") var razorpayKeyIdProduction: String = "rzp_live_your_production_key"
+    @get:PropertyName("razorpayKeyIdProduction") @set:PropertyName("razorpayKeyIdProduction") var razorpayKeyIdProduction: String = "rzp_live_your_production_key",
+    @get:PropertyName("openRouterApiKey") @set:PropertyName("openRouterApiKey") var openRouterApiKey: String = "",
+    @get:PropertyName("openRouterModel") @set:PropertyName("openRouterModel") var openRouterModel: String = "google/gemini-2.0-flash-lite:free"
 )

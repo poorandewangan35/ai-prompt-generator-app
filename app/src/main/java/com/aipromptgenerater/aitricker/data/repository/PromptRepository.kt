@@ -3,7 +3,7 @@ package com.aipromptgenerater.aitricker.data.repository
 import android.util.Log
 import com.aipromptgenerater.aitricker.data.model.PromptHistory
 import com.aipromptgenerater.aitricker.data.model.SystemConfig
-import com.aipromptgenerater.aitricker.data.remote.GeminiClient
+import com.aipromptgenerater.aitricker.data.remote.OpenRouterClient
 import com.google.firebase.firestore.FirebaseFirestore
 import com.google.firebase.firestore.Query
 import kotlinx.coroutines.channels.awaitClose
@@ -14,12 +14,12 @@ import java.util.UUID
 
 class PromptRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val geminiClient: GeminiClient = GeminiClient()
+    private val openRouterClient: OpenRouterClient = OpenRouterClient()
 ) {
 
     companion object {
         private const val TAG = "PromptRepository"
-        private const val GEMINI_API_KEY_FALLBACK = "AIzaSyD_EXAMPLE_KEY_FOR_TESTING" // Placeholder
+        private const val OPENROUTER_API_KEY_FALLBACK = "sk-or-v1-fallback-key" // Placeholder
     }
 
     /**
@@ -89,9 +89,10 @@ class PromptRepository(
                 return Result.failure(Exception("Insufficient credits. You need at least 5 credits to generate a prompt."))
             }
 
-            // 2. Fetch Gemini API key securely from Firestore config (avoiding app exposure)
+            // 2. Fetch OpenRouter credentials securely from Firestore config
             val configDoc = firestore.collection("config").document("system").get().await()
-            val apiKey = configDoc.getString("geminiApiKey") ?: GEMINI_API_KEY_FALLBACK
+            val apiKey = configDoc.getString("openRouterApiKey") ?: OPENROUTER_API_KEY_FALLBACK
+            val model = configDoc.getString("openRouterModel") ?: "google/gemini-2.0-flash-lite:free"
 
             // 3. Fetch system instruction
             val systemConfig = getSystemConfig()
@@ -101,7 +102,7 @@ class PromptRepository(
                 systemConfig.websiteSystemPrompt
             }
 
-            // 4. Construct Gemini prompt payload
+            // 4. Construct prompt payload
             val userPromptBuilder = StringBuilder().apply {
                 if (name.isNotEmpty()) append("Project Name: $name\n")
                 append("Core Idea: $idea\n")
@@ -109,18 +110,19 @@ class PromptRepository(
                 if (features.isNotEmpty()) append("Core Features List: $features\n")
             }
 
-            // 5. Call Gemini API
-            val geminiResult = geminiClient.generatePrompt(
+            // 5. Call OpenRouter API
+            val openRouterResult = openRouterClient.generatePrompt(
                 apiKey = apiKey,
+                model = model,
                 systemInstruction = systemInstruction,
                 userPrompt = userPromptBuilder.toString()
             )
 
-            if (geminiResult.isFailure) {
-                return Result.failure(geminiResult.exceptionOrNull() ?: Exception("Gemini API generation failed"))
+            if (openRouterResult.isFailure) {
+                return Result.failure(openRouterResult.exceptionOrNull() ?: Exception("OpenRouter API generation failed"))
             }
 
-            val generatedResponse = geminiResult.getOrThrow()
+            val generatedResponse = openRouterResult.getOrThrow()
 
             // 6. Execute atomic batch write: decrement credits and write prompt history
             val promptId = "prompt_" + UUID.randomUUID().toString().replace("-", "")

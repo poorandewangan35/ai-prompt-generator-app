@@ -11,49 +11,53 @@ import java.io.OutputStreamWriter
 import java.net.HttpURLConnection
 import java.net.URL
 
-class GeminiClient {
+class OpenRouterClient {
 
     companion object {
-        private const val TAG = "GeminiClient"
-        private const val BASE_URL = "https://generativelanguage.googleapis.com/v1beta/models/gemini-2.5-flash-lite:generateContent"
+        private const val TAG = "OpenRouterClient"
+        private const val BASE_URL = "https://openrouter.ai/api/v1/chat/completions"
     }
 
     /**
-     * Generates prompt content using gemini-2.5-flash-lite.
-     * Extracts plain text and cleans markdown tags (e.g. **, *, #) as requested.
+     * Generates prompt content using OpenRouter API.
+     * Uses specified model and system instruction.
      */
     suspend fun generatePrompt(
         apiKey: String,
+        model: String,
         systemInstruction: String,
         userPrompt: String
     ): Result<String> = withContext(Dispatchers.IO) {
         try {
-            val urlString = "$BASE_URL?key=$apiKey"
-            val url = URL(urlString)
+            val url = URL(BASE_URL)
             val connection = url.openConnection() as HttpURLConnection
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json")
+            connection.setRequestProperty("Authorization", "Bearer $apiKey")
+            connection.setRequestProperty("HTTP-Referer", "https://github.com/poorandewangan35/ai-prompt-generator-app")
+            connection.setRequestProperty("X-Title", "AI Prompt Generator")
             connection.doOutput = true
 
-            // Build request JSON
+            // Build OpenAI-compatible chat request JSON
             val requestJson = JSONObject().apply {
-                val contentsArray = JSONArray().apply {
-                    val contentObj = JSONObject().apply {
-                        put("role", "user")
-                        put("parts", JSONArray().apply {
-                            put(JSONObject().apply { put("text", "$systemInstruction\n\nUser Input: $userPrompt") })
-                        })
-                    }
-                    put(contentObj)
-                }
-                put("contents", contentsArray)
+                put("model", model)
                 
-                // Add system instructions if supported by endpoint, or combine in text
-                put("generationConfig", JSONObject().apply {
-                    put("temperature", 0.7)
-                    put("topK", 40)
-                    put("topP", 0.95)
-                })
+                val messagesArray = JSONArray().apply {
+                    // System prompt message
+                    val systemMessage = JSONObject().apply {
+                        put("role", "system")
+                        put("content", systemInstruction)
+                    }
+                    put(systemMessage)
+                    
+                    // User prompt message
+                    val userMessage = JSONObject().apply {
+                        put("role", "user")
+                        put("content", userPrompt)
+                    }
+                    put(userMessage)
+                }
+                put("messages", messagesArray)
             }
 
             // Write output stream
@@ -73,18 +77,15 @@ class GeminiClient {
                 responseReader.close()
 
                 val responseJson = JSONObject(responseStringBuilder.toString())
-                val candidates = responseJson.optJSONArray("candidates")
-                if (candidates != null && candidates.length() > 0) {
-                    val firstCandidate = candidates.getJSONObject(0)
-                    val content = firstCandidate.optJSONObject("content")
-                    val parts = content?.optJSONArray("parts")
-                    if (parts != null && parts.length() > 0) {
-                        val rawText = parts.getJSONObject(0).optString("text")
-                        val cleanText = sanitizeMarkdown(rawText)
-                        return@withContext Result.success(cleanText)
-                    }
+                val choices = responseJson.optJSONArray("choices")
+                if (choices != null && choices.length() > 0) {
+                    val firstChoice = choices.getJSONObject(0)
+                    val messageObj = firstChoice.optJSONObject("message")
+                    val rawText = messageObj?.optString("content") ?: ""
+                    val cleanText = sanitizeMarkdown(rawText)
+                    return@withContext Result.success(cleanText)
                 }
-                return@withContext Result.failure(Exception("Empty response parts from Gemini API"))
+                return@withContext Result.failure(Exception("Empty response choices from OpenRouter API"))
             } else {
                 val errorReader = BufferedReader(InputStreamReader(connection.errorStream ?: connection.inputStream))
                 val errorStringBuilder = StringBuilder()
@@ -94,16 +95,16 @@ class GeminiClient {
                 }
                 errorReader.close()
                 Log.e(TAG, "Error Response: ${errorStringBuilder.toString()}")
-                return@withContext Result.failure(Exception("Gemini API Error ($responseCode): ${connection.responseMessage}"))
+                return@withContext Result.failure(Exception("OpenRouter API Error ($responseCode): ${connection.responseMessage}"))
             }
         } catch (e: Exception) {
-            Log.e(TAG, "Exception during content generation", e)
+            Log.e(TAG, "Exception during content generation via OpenRouter", e)
             return@withContext Result.failure(e)
         }
     }
 
     /**
-     * Sanitizes markdown text by stripping tags as required: ** bold, * bullet, # headers, etc.
+     * Sanitizes markdown text by stripping tags: ** bold, * bullet, # headers, etc.
      */
     private fun sanitizeMarkdown(markdown: String): String {
         return markdown

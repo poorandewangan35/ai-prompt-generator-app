@@ -24,10 +24,10 @@ export default function DashboardView() {
       setReceiptCount(snapshot.size);
     });
 
-    // Check Gemini API key configuration status directly on the system document
+    // Check OpenRouter API key configuration status directly on the system document
     const unsubscribeConfig = onSnapshot(doc(db, "config", "system"), (docSnap) => {
       if (docSnap.exists()) {
-        const key = docSnap.data().geminiApiKey;
+        const key = docSnap.data().openRouterApiKey;
         setApiKeyConfigured(key && typeof key === "string" && key.trim().length > 10);
       } else {
         setApiKeyConfigured(false);
@@ -94,7 +94,7 @@ export default function DashboardView() {
 
         <div className="metric-card">
           <div className="metric-info">
-            <h3>Gemini API Status</h3>
+            <h3>OpenRouter API Status</h3>
             <div className="value" style={{ fontSize: "16px", marginTop: "8px", fontWeight: "600" }}>
               {apiKeyConfigured === null ? (
                 "Checking..."
