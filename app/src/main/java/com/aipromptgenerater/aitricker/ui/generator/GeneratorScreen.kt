@@ -201,107 +201,132 @@ fun ToggleChecklistRow(
     }
 }
 
+data class DesignTheme(
+    val name: String,
+    val gradient: Brush
+)
+
 @Composable
 fun ThemeSelector(
     selectedTheme: String,
     onThemeSelected: (String) -> Unit
 ) {
-    Row(
-        modifier = Modifier.fillMaxWidth(),
-        horizontalArrangement = Arrangement.spacedBy(16.dp)
-    ) {
-        // Dark AI Style Card
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .clickable { onThemeSelected("Dark AI Style") }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color(0xFF1E085E), Color(0xFF6B11FF))
-                        )
-                    )
-                    .border(
-                        BorderStroke(
-                            width = if (selectedTheme == "Dark AI Style") 2.dp else 1.dp,
-                            color = if (selectedTheme == "Dark AI Style") MaterialTheme.colorScheme.primary else Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
-            Row(
-                modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
-            ) {
-                Text(
-                    text = "Dark AI Style",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (selectedTheme == "Dark AI Style") MaterialTheme.colorScheme.onSurface else Color.Gray
+    val themes = remember {
+        listOf(
+            DesignTheme(
+                name = "Let AI Choose (Skip)",
+                gradient = Brush.linearGradient(
+                    colors = listOf(Color(0xFF8A2387), Color(0xFFE94057), Color(0xFFF27121))
                 )
-                if (selectedTheme == "Dark AI Style") {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(12.dp)
-                    )
-                }
-            }
-        }
+            ),
+            DesignTheme(
+                name = "Dark AI Cyberpunk",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF1E085E), Color(0xFF6B11FF))
+                )
+            ),
+            DesignTheme(
+                name = "Light Pro Clean",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFE8F5E9), Color(0xFF81C784))
+                )
+            ),
+            DesignTheme(
+                name = "Glassmorphism Blue",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFE0F7FA), Color(0xFF00B0FF))
+                )
+            ),
+            DesignTheme(
+                name = "Sunset Warmth",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFFFF9100), Color(0xFFFF4081))
+                )
+            ),
+            DesignTheme(
+                name = "Minimal Slate",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF78909C), Color(0xFF263238))
+                )
+            ),
+            DesignTheme(
+                name = "Emerald Gold",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF2E7D32), Color(0xFFFFD54F))
+                )
+            ),
+            DesignTheme(
+                name = "Royal Orchid",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF8E24AA), Color(0xFFF06292))
+                )
+            ),
+            DesignTheme(
+                name = "Ocean Breeze",
+                gradient = Brush.verticalGradient(
+                    colors = listOf(Color(0xFF00ACC1), Color(0xFF0D47A1))
+                )
+            )
+        )
+    }
 
-        // Light Pro Style Card
-        Column(
-            modifier = Modifier
-                .weight(1f)
-                .clickable { onThemeSelected("Light Pro Style") }
-        ) {
-            Box(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(80.dp)
-                    .clip(RoundedCornerShape(12.dp))
-                    .background(
-                        Brush.verticalGradient(
-                            colors = listOf(Color(0xFFE8F5E9), Color(0xFF81C784))
-                        )
-                    )
-                    .border(
-                        BorderStroke(
-                            width = if (selectedTheme == "Light Pro Style") 2.dp else 1.dp,
-                            color = if (selectedTheme == "Light Pro Style") MaterialTheme.colorScheme.primary else Color.Transparent
-                        ),
-                        shape = RoundedCornerShape(12.dp)
-                    )
-            )
-            Spacer(modifier = Modifier.height(8.dp))
+    Column(
+        modifier = Modifier.fillMaxWidth(),
+        verticalArrangement = Arrangement.spacedBy(16.dp)
+    ) {
+        val rows = themes.chunked(2)
+        rows.forEach { rowThemes ->
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.Center,
-                verticalAlignment = Alignment.CenterVertically
+                horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
-                Text(
-                    text = "Light Pro Style",
-                    fontSize = 12.sp,
-                    fontWeight = FontWeight.Bold,
-                    color = if (selectedTheme == "Light Pro Style") MaterialTheme.colorScheme.onSurface else Color.Gray
-                )
-                if (selectedTheme == "Light Pro Style") {
-                    Spacer(modifier = Modifier.width(4.dp))
-                    Icon(
-                        imageVector = Icons.Default.Check,
-                        contentDescription = "Selected",
-                        tint = MaterialTheme.colorScheme.primary,
-                        modifier = Modifier.size(12.dp)
-                    )
+                rowThemes.forEach { theme ->
+                    Column(
+                        modifier = Modifier
+                            .weight(1f)
+                            .clickable { onThemeSelected(theme.name) }
+                    ) {
+                        Box(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .height(80.dp)
+                                .clip(RoundedCornerShape(12.dp))
+                                .background(theme.gradient)
+                                .border(
+                                    BorderStroke(
+                                        width = if (selectedTheme == theme.name) 2.dp else 1.dp,
+                                        color = if (selectedTheme == theme.name) MaterialTheme.colorScheme.primary else Color.Transparent
+                                    ),
+                                    shape = RoundedCornerShape(12.dp)
+                                )
+                        )
+                        Spacer(modifier = Modifier.height(8.dp))
+                        Row(
+                            modifier = Modifier.fillMaxWidth(),
+                            horizontalArrangement = Arrangement.Center,
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Text(
+                                text = theme.name,
+                                fontSize = 11.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = if (selectedTheme == theme.name) MaterialTheme.colorScheme.onSurface else Color.Gray,
+                                textAlign = TextAlign.Center
+                            )
+                            if (selectedTheme == theme.name) {
+                                Spacer(modifier = Modifier.width(4.dp))
+                                Icon(
+                                    imageVector = Icons.Default.Check,
+                                    contentDescription = "Selected",
+                                    tint = MaterialTheme.colorScheme.primary,
+                                    modifier = Modifier.size(12.dp)
+                                )
+                            }
+                        }
+                    }
+                }
+                if (rowThemes.size == 1) {
+                    Spacer(modifier = Modifier.weight(1f))
                 }
             }
         }
@@ -329,7 +354,7 @@ fun GeneratorScreen(
     var authSystem by remember { mutableStateOf("Google Login") }
     var isAuthHelpExpanded by remember { mutableStateOf(false) }
 
-    var uiTheme by remember { mutableStateOf("Dark AI Style") }
+    var uiTheme by remember { mutableStateOf("Let AI Choose (Skip)") }
 
     var paymentGateway by remember { mutableStateOf("Razorpay") }
     var isPaymentHelpExpanded by remember { mutableStateOf(false) }
@@ -337,7 +362,7 @@ fun GeneratorScreen(
     var monetizationModel by remember { mutableStateOf("Product Based (like Amazon)") }
     var isMonetizationHelpExpanded by remember { mutableStateOf(false) }
 
-    var aiIntegration by remember { mutableStateOf("No AI Integration") }
+    var aiIntegration by remember { mutableStateOf("Let AI Choose (Skip)") }
 
     var preferredTechStack by remember { mutableStateOf("") }
 
@@ -459,7 +484,7 @@ fun GeneratorScreen(
                             packageOrDomain = ""
                             panelType = "Only User"
                             authSystem = "Google Login"
-                            uiTheme = "Dark AI Style"
+                            uiTheme = "Let AI Choose (Skip)"
                             paymentGateway = "Razorpay"
                             monetizationModel = "Product Based (like Amazon)"
                             isMonetizationHelpExpanded = false
@@ -472,7 +497,7 @@ fun GeneratorScreen(
                             hasNotifications = false
                             hasAnalytics = false
                             isAdvancedSettingsExpanded = false
-                            aiIntegration = "No AI Integration"
+                            aiIntegration = "Let AI Choose (Skip)"
                             projectIdea = ""
                             extraFeatures = ""
                             isPreviewShown = false
@@ -689,15 +714,53 @@ fun GeneratorScreen(
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     SegmentedOptionRow(
-                                        options = listOf("No AI Integration", "Gemini (Google)"),
+                                        options = listOf("Let AI Choose (Skip)", "No AI Integration"),
                                         selectedOption = aiIntegration,
                                         onOptionSelected = { aiIntegration = it }
                                     )
                                     SegmentedOptionRow(
-                                        options = listOf("OpenRouter", "ChatGPT (OpenAI)"),
+                                        options = listOf("Gemini (Google)", "ChatGPT (OpenAI)"),
                                         selectedOption = aiIntegration,
                                         onOptionSelected = { aiIntegration = it }
                                     )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        val isSelected = aiIntegration == "OpenRouter"
+                                        Button(
+                                            onClick = { aiIntegration = "OpenRouter" },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (isSelected) Color(0xFFB2DFDB) else Color.White
+                                            ),
+                                            shape = RoundedCornerShape(12.dp),
+                                            border = BorderStroke(1.dp, if (isSelected) Color(0xFF004D40) else Color(0xFFCCCCCC)),
+                                            modifier = Modifier.weight(1f),
+                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                if (isSelected) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = "Selected",
+                                                        tint = Color(0xFF004D40),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                }
+                                                Text(
+                                                    text = "OpenRouter",
+                                                    color = if (isSelected) Color(0xFF004D40) else Color.Gray,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 12.sp
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
                                 }
                             }
 
