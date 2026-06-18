@@ -45,6 +45,8 @@ service cloud.firestore {
       allow create: if request.auth != null 
         && request.resource.data.userId == request.auth.uid
         && getAfter(/databases/$(database)/documents/users/$(request.auth.uid)).data.credits == get(/databases/$(database)/documents/users/$(request.auth.uid)).data.credits - 5;
+
+      allow delete: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
     }
 
     // Dynamic configuration/pricing config (read-only for normal users, read/write for admins)
