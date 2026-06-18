@@ -28,7 +28,6 @@ class PromptRepository(
     fun promptHistoryFlow(userId: String): Flow<List<PromptHistory>> = callbackFlow {
         val query = firestore.collection("prompts")
             .whereEqualTo("userId", userId)
-            .orderBy("createdAt", Query.Direction.DESCENDING)
 
         val registration = query.addSnapshotListener { snapshot, error ->
             if (error != null) {
@@ -39,7 +38,7 @@ class PromptRepository(
             if (snapshot != null) {
                 val prompts = snapshot.documents.mapNotNull { doc ->
                     doc.toObject(PromptHistory::class.java)?.apply { id = doc.id }
-                }
+                }.sortedByDescending { it.createdAt }
                 trySend(prompts)
             } else {
                 trySend(emptyList())

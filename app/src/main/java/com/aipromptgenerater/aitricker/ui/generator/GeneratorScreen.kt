@@ -540,19 +540,49 @@ fun GeneratorScreen(
                             viewModel.resetState()
                         },
                         onShareWhatsApp = {
-                            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                                type = "text/plain"
-                                putExtra(Intent.EXTRA_TEXT, state.promptHistory.response)
-                            }
+                            val cacheDir = context.cacheDir
+                            val tempFile = java.io.File(cacheDir, "AI_Generated_Prompt.txt")
                             try {
+                                tempFile.writeText(state.promptHistory.response)
+                                val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                                    context,
+                                    "${context.packageName}.fileprovider",
+                                    tempFile
+                                )
+                                
                                 val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
                                     type = "text/plain"
-                                    putExtra(Intent.EXTRA_TEXT, state.promptHistory.response)
+                                    putExtra(Intent.EXTRA_STREAM, fileUri)
+                                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
                                     setPackage("com.whatsapp")
                                 }
                                 context.startActivity(whatsappIntent)
                             } catch (e: Exception) {
-                                context.startActivity(Intent.createChooser(shareIntent, "Share Prompt via"))
+                                Log.e("SHARE_WHATSAPP", "Failed to share file directly via WhatsApp, attempting fallback share chooser", e)
+                                try {
+                                    if (tempFile.exists()) {
+                                        val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                                            context,
+                                            "${context.packageName}.fileprovider",
+                                            tempFile
+                                        )
+                                        val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_STREAM, fileUri)
+                                            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                                        }
+                                        context.startActivity(Intent.createChooser(shareIntent, "Share Prompt File"))
+                                    } else {
+                                        val textShareIntent = Intent(Intent.ACTION_SEND).apply {
+                                            type = "text/plain"
+                                            putExtra(Intent.EXTRA_TEXT, state.promptHistory.response)
+                                        }
+                                        context.startActivity(Intent.createChooser(textShareIntent, "Share Prompt Text"))
+                                    }
+                                } catch (innerEx: Exception) {
+                                    Log.e("SHARE_WHATSAPP", "Fallback share chooser failed", innerEx)
+                                    Toast.makeText(context, "Sharing failed: ${innerEx.message}", Toast.LENGTH_SHORT).show()
+                                }
                             }
                         },
                         onDownloadPdf = {
