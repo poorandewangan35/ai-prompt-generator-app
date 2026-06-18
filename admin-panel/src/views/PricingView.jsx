@@ -6,6 +6,9 @@ export default function PricingView() {
   const [priceBasic, setPriceBasic] = useState(99);
   const [pricePopular, setPricePopular] = useState(299);
   const [pricePremium, setPricePremium] = useState(499);
+  const [creditsBasic, setCreditsBasic] = useState(499);
+  const [creditsPopular, setCreditsPopular] = useState(1599);
+  const [creditsPremium, setCreditsPremium] = useState(2999);
   const [razorpayKeySandbox, setRazorpayKeySandbox] = useState("");
   const [razorpayKeyProduction, setRazorpayKeyProduction] = useState("");
   const [loading, setLoading] = useState(true);
@@ -22,6 +25,9 @@ export default function PricingView() {
           setPriceBasic(data.pricePlanBasic ?? 99);
           setPricePopular(data.pricePlanPopular ?? 299);
           setPricePremium(data.pricePlanPremium ?? 499);
+          setCreditsBasic(data.creditsPlanBasic ?? 499);
+          setCreditsPopular(data.creditsPlanPopular ?? 1599);
+          setCreditsPremium(data.creditsPlanPremium ?? 2999);
           setRazorpayKeySandbox(data.razorpayKeyIdSandbox ?? "");
           setRazorpayKeyProduction(data.razorpayKeyIdProduction ?? "");
         }
@@ -51,6 +57,9 @@ export default function PricingView() {
         pricePlanBasic: Number(priceBasic),
         pricePlanPopular: Number(pricePopular),
         pricePlanPremium: Number(pricePremium),
+        creditsPlanBasic: Number(creditsBasic),
+        creditsPlanPopular: Number(creditsPopular),
+        creditsPlanPremium: Number(creditsPremium),
         razorpayKeyIdSandbox: razorpayKeySandbox,
         razorpayKeyIdProduction: razorpayKeyProduction
       });
@@ -86,40 +95,84 @@ export default function PricingView() {
         <div className="glass-card">
           <h2 className="card-title">Active Pricing Packages</h2>
           
-          <div className="form-group">
-            <label>Basic Package Price (₹) • 499 Credits</label>
-            <input
-              type="number"
-              className="form-control"
-              value={priceBasic}
-              onChange={(e) => setPriceBasic(e.target.value)}
-              required
-              min="1"
-            />
-          </div>
+          <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
+            {/* Basic Package */}
+            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+                <label>Basic Package Price (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={priceBasic}
+                  onChange={(e) => setPriceBasic(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+                <label>Basic Package Credits</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={creditsBasic}
+                  onChange={(e) => setCreditsBasic(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label>Most Popular Package Price (₹) • 1599 Credits</label>
-            <input
-              type="number"
-              className="form-control"
-              value={pricePopular}
-              onChange={(e) => setPricePopular(e.target.value)}
-              required
-              min="1"
-            />
-          </div>
+            {/* Popular Package */}
+            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+                <label>Most Popular Package Price (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={pricePopular}
+                  onChange={(e) => setPricePopular(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+                <label>Most Popular Package Credits</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={creditsPopular}
+                  onChange={(e) => setCreditsPopular(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+            </div>
 
-          <div className="form-group">
-            <label>Premium Package Price (₹) • 2999 Credits</label>
-            <input
-              type="number"
-              className="form-control"
-              value={pricePremium}
-              onChange={(e) => setPricePremium(e.target.value)}
-              required
-              min="1"
-            />
+            {/* Premium Package */}
+            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
+              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+                <label>Premium Package Price (₹)</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={pricePremium}
+                  onChange={(e) => setPricePremium(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+                <label>Premium Package Credits</label>
+                <input
+                  type="number"
+                  className="form-control"
+                  value={creditsPremium}
+                  onChange={(e) => setCreditsPremium(e.target.value)}
+                  required
+                  min="1"
+                />
+              </div>
+            </div>
           </div>
         </div>
 

@@ -281,6 +281,7 @@ fun ThemeSelector(
                 horizontalArrangement = Arrangement.spacedBy(16.dp)
             ) {
                 rowThemes.forEach { theme ->
+                    val isSkipOption = theme.name == "Let AI Choose (Skip)"
                     Column(
                         modifier = Modifier
                             .weight(1f)
@@ -291,15 +292,37 @@ fun ThemeSelector(
                                 .fillMaxWidth()
                                 .height(80.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(theme.gradient)
+                                .background(
+                                    if (isSkipOption) {
+                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                    } else {
+                                        theme.gradient
+                                    }
+                                )
                                 .border(
                                     BorderStroke(
                                         width = if (selectedTheme == theme.name) 2.dp else 1.dp,
-                                        color = if (selectedTheme == theme.name) MaterialTheme.colorScheme.primary else Color.Transparent
+                                        color = if (selectedTheme == theme.name) {
+                                            MaterialTheme.colorScheme.primary
+                                        } else if (isSkipOption) {
+                                            MaterialTheme.colorScheme.onSurface.copy(alpha = 0.2f)
+                                        } else {
+                                            Color.Transparent
+                                        }
                                     ),
                                     shape = RoundedCornerShape(12.dp)
+                                ),
+                            contentAlignment = Alignment.Center
+                        ) {
+                            if (isSkipOption) {
+                                Icon(
+                                    imageVector = Icons.Default.Palette,
+                                    contentDescription = null,
+                                    tint = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.3f),
+                                    modifier = Modifier.size(24.dp)
                                 )
-                        )
+                            }
+                        }
                         Spacer(modifier = Modifier.height(8.dp))
                         Row(
                             modifier = Modifier.fillMaxWidth(),
@@ -307,7 +330,7 @@ fun ThemeSelector(
                             verticalAlignment = Alignment.CenterVertically
                         ) {
                             Text(
-                                text = theme.name,
+                                text = if (isSkipOption) "Skip (Let AI Choose)" else theme.name,
                                 fontSize = 11.sp,
                                 fontWeight = FontWeight.Bold,
                                 color = if (selectedTheme == theme.name) MaterialTheme.colorScheme.onSurface else Color.Gray,

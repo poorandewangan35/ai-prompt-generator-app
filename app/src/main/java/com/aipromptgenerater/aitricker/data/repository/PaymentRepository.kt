@@ -35,9 +35,9 @@ class PaymentRepository(
         return try {
             val systemConfig = loadSystemConfig()
             listOf(
-                PaymentPlan(systemConfig.pricePlanBasic, 499, "Basic Plan", "Get 499 credits to start building ideas", ""),
-                PaymentPlan(systemConfig.pricePlanPopular, 1599, "Most Popular", "Get 1599 credits for extensive prompt tuning", "Popular"),
-                PaymentPlan(systemConfig.pricePlanPremium, 2999, "Premium Creator", "Get 2999 credits with ultimate priority access", "Best Value")
+                PaymentPlan(systemConfig.pricePlanBasic, systemConfig.creditsPlanBasic, "Basic Plan", "Get ${systemConfig.creditsPlanBasic} credits to start building ideas", ""),
+                PaymentPlan(systemConfig.pricePlanPopular, systemConfig.creditsPlanPopular, "Most Popular", "Get ${systemConfig.creditsPlanPopular} credits for extensive prompt tuning", "Popular"),
+                PaymentPlan(systemConfig.pricePlanPremium, systemConfig.creditsPlanPremium, "Premium Creator", "Get ${systemConfig.creditsPlanPremium} credits with ultimate priority access", "Best Value")
             )
         } catch (e: Exception) {
             Log.e(TAG, "Error loading payment plans, using local preset values", e)
