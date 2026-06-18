@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.filled.AttachMoney
+import androidx.compose.material.icons.filled.Build
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -311,6 +312,8 @@ fun GeneratorScreen(
 
     var aiIntegration by remember { mutableStateOf("No AI Integration") }
 
+    var preferredTechStack by remember { mutableStateOf("") }
+
     var projectIdea by remember { mutableStateOf("") }
 
     // Preview state
@@ -327,8 +330,13 @@ fun GeneratorScreen(
             projectName
         }
     }
-    val finalTechStack = remember(uiTheme, paymentGateway, aiIntegration) {
-        "UI Theme: $uiTheme | Payment Gateway: $paymentGateway | AI Integration: $aiIntegration"
+    val finalTechStack = remember(uiTheme, paymentGateway, aiIntegration, preferredTechStack) {
+        val base = "UI Theme: $uiTheme | Payment Gateway: $paymentGateway | AI Integration: $aiIntegration"
+        if (preferredTechStack.trim().isNotEmpty()) {
+            "$base | Preferred Tech Stack: $preferredTechStack"
+        } else {
+            base
+        }
     }
     val finalFeatures = remember(panelType, authSystem, monetizationModel) {
         "Panel Type: $panelType | Login System: $authSystem | Monetization Model: $monetizationModel"
@@ -397,6 +405,7 @@ fun GeneratorScreen(
                             paymentGateway = "Razorpay"
                             monetizationModel = "Product Based (like Amazon)"
                             isMonetizationHelpExpanded = false
+                            preferredTechStack = ""
                             aiIntegration = "No AI Integration"
                             projectIdea = ""
                             extraFeatures = ""
@@ -626,6 +635,30 @@ fun GeneratorScreen(
                                 }
                             }
 
+                            // 6.5 Preferred Tech Stack Card (Optional)
+                            OptionGroupCard(
+                                icon = Icons.Default.Build,
+                                title = "Preferred Tech Stack (Optional)"
+                            ) {
+                                OutlinedTextField(
+                                    value = preferredTechStack,
+                                    onValueChange = { preferredTechStack = it },
+                                    label = { Text("Technologies / Frameworks") },
+                                    placeholder = { 
+                                        Text(
+                                            if (generatorType == "App") {
+                                                "e.g. Kotlin, Jetpack Compose, Firebase"
+                                            } else {
+                                                "e.g. React, Next.js, TailwindCSS, Node.js"
+                                            }
+                                        ) 
+                                    },
+                                    modifier = Modifier.fillMaxWidth(),
+                                    shape = RoundedCornerShape(16.dp),
+                                    singleLine = true
+                                )
+                            }
+
                             // 7. Describe Card
                             OptionGroupCard(
                                 icon = Icons.Default.Info,
@@ -712,18 +745,24 @@ fun GeneratorScreen(
                                     )
                                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
 
-                                    val details = listOf(
-                                        "Project Type" to generatorType,
-                                        "Name" to projectName.ifEmpty { "Not specified" },
-                                        (if (generatorType == "App") "Package Name" else "Domain Name") to packageOrDomain.ifEmpty { "Not specified" },
-                                        "Panel Type" to panelType,
-                                        "Auth System" to authSystem,
-                                        "UI Theme" to uiTheme,
-                                        "Payment Gateway" to paymentGateway,
-                                        "Monetization Model" to monetizationModel,
-                                        "AI Integration" to aiIntegration,
-                                        "Description" to projectIdea
-                                    )
+                                    val details = remember(projectName, packageOrDomain, panelType, authSystem, uiTheme, paymentGateway, monetizationModel, aiIntegration, preferredTechStack, projectIdea) {
+                                        val list = mutableListOf(
+                                            "Project Type" to generatorType,
+                                            "Name" to projectName.ifEmpty { "Not specified" },
+                                            (if (generatorType == "App") "Package Name" else "Domain Name") to packageOrDomain.ifEmpty { "Not specified" },
+                                            "Panel Type" to panelType,
+                                            "Auth System" to authSystem,
+                                            "UI Theme" to uiTheme,
+                                            "Payment Gateway" to paymentGateway,
+                                            "Monetization Model" to monetizationModel,
+                                            "AI Integration" to aiIntegration
+                                        )
+                                        if (preferredTechStack.trim().isNotEmpty()) {
+                                            list.add("Preferred Tech Stack" to preferredTechStack)
+                                        }
+                                        list.add("Description" to projectIdea)
+                                        list
+                                    }
 
                                     details.forEach { (label, value) ->
                                         Column {
