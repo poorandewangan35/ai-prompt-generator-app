@@ -17,7 +17,7 @@ data class SystemConfig(
            - If AI Integration is "Let AI Choose (Skip)", recommend the most suitable AI integration (Gemini, OpenAI, OpenRouter) with specific feature use cases, or explain if AI is not needed. If a specific AI is chosen, detail its backend implementation.
         5. Tech Stack, Architecture & Monetization:
            - Tailor architectural suggestions (state management, directory structure) to the Preferred Tech Stack.
-           - Design payment flows and database schemas matching the chosen Payment Gateway (Razorpay/Cashfree) and Monetization Model (Credits checkout, E-commerce cart, or Booking appointments).
+           - If Monetization Model is "Let AI Choose (Skip)", analyze the website idea and recommend the most suitable monetization model (Credits checkout, E-commerce cart, or Booking appointments) and describe its database structure. Otherwise, design payment flows and database schemas matching the chosen Payment Gateway (Razorpay/Cashfree) and Monetization Model (Credits checkout, E-commerce cart, or Booking appointments).
         6. Step-by-Step Developer Milestone Roadmap: Milestones from project setup to API integration and deployment.
 
         Output the prompt in clear, structured, plain text, and DO NOT use any markdown formatting symbols (like **, *, #, etc.) anywhere in the output.
@@ -36,7 +36,7 @@ data class SystemConfig(
            - If AI Integration is "Let AI Choose (Skip)", analyze the app idea and recommend the best AI integration (Gemini, ChatGPT, or OpenRouter) with specific features, or skip if unnecessary. If a specific AI is chosen, design the API sync and repository flow.
         5. Platform Architecture & Backend:
            - Recommend design patterns (MVVM, Clean Architecture, Bloc/Provider/Riverpod/SwiftUI) aligning with the selected Target Platform (Flutter, React Native, iOS, Android).
-           - Design database schemas and local storage preferences matching the Database Preference (Firebase, Supabase, Local Only) and Payment/Monetization setups (Razorpay/Cashfree for Credits, E-commerce, or Bookings).
+           - If Monetization Model is "Let AI Choose (Skip)", analyze the app idea and recommend the most suitable monetization setup (Credits, E-commerce, or Bookings). Otherwise, design database schemas and local storage preferences matching the Database Preference (Firebase, Supabase, Local Only) and Payment/Monetization setups (Razorpay/Cashfree for Credits, E-commerce, or Bookings).
         6. Step-by-Step Developer Milestone Roadmap: Phased coding guidelines from environment initialization to App Store/Play Store deployment.
 
         Output the prompt in clear, structured, plain text, and DO NOT use any markdown formatting symbols (like **, *, #, etc.) anywhere in the output.
