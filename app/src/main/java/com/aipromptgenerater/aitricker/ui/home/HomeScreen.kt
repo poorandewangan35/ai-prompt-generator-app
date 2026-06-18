@@ -27,6 +27,9 @@ import com.aipromptgenerater.aitricker.data.model.PromptHistory
 import com.aipromptgenerater.aitricker.ui.components.PremiumCard
 import androidx.compose.ui.platform.LocalContext
 import com.aipromptgenerater.aitricker.theme.ThemeManager
+import com.aipromptgenerater.aitricker.ui.utils.copyToClipboard
+import com.aipromptgenerater.aitricker.ui.utils.shareToWhatsApp
+import com.aipromptgenerater.aitricker.ui.utils.savePromptAsPdf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -416,6 +419,7 @@ fun PromptDetailDialog(
     prompt: PromptHistory,
     onDismiss: () -> Unit
 ) {
+    val context = LocalContext.current
     AlertDialog(
         onDismissRequest = onDismiss,
         title = {
@@ -462,8 +466,62 @@ fun PromptDetailDialog(
             }
         },
         confirmButton = {
-            Button(onClick = onDismiss) {
-                Text("Close")
+            Column(
+                modifier = Modifier.fillMaxWidth(),
+                verticalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                ) {
+                    // Copy
+                    Button(
+                        onClick = { copyToClipboard(context, prompt.response) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text("Copy", fontSize = 12.sp)
+                    }
+
+                    // WhatsApp
+                    Button(
+                        onClick = { shareToWhatsApp(context, prompt.response) },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text("WhatsApp", color = Color.White, fontSize = 11.sp)
+                    }
+
+                    // PDF
+                    OutlinedButton(
+                        onClick = {
+                            val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
+                            savePromptAsPdf(context, title, prompt.response)
+                        },
+                        modifier = Modifier
+                            .weight(1f)
+                            .height(40.dp),
+                        shape = RoundedCornerShape(10.dp),
+                        contentPadding = PaddingValues(horizontal = 4.dp)
+                    ) {
+                        Text("PDF", fontSize = 12.sp)
+                    }
+                }
+
+                // Close Button
+                TextButton(
+                    onClick = onDismiss,
+                    modifier = Modifier.align(Alignment.End)
+                ) {
+                    Text("Close")
+                }
             }
         }
     )

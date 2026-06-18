@@ -32,6 +32,9 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
 import com.aipromptgenerater.aitricker.data.model.PromptHistory
 import com.aipromptgenerater.aitricker.ui.components.PremiumCard
+import com.aipromptgenerater.aitricker.ui.utils.copyToClipboard
+import com.aipromptgenerater.aitricker.ui.utils.shareToWhatsApp
+import com.aipromptgenerater.aitricker.ui.utils.savePromptAsPdf
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -201,6 +204,7 @@ fun PromptDetailPane(
     onClose: () -> Unit,
     onCopy: () -> Unit
 ) {
+    val context = LocalContext.current
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -325,14 +329,48 @@ fun PromptDetailPane(
 
             Spacer(modifier = Modifier.height(16.dp))
 
-            Button(
-                onClick = onCopy,
+            Row(
                 modifier = Modifier
                     .fillMaxWidth()
                     .height(50.dp),
-                shape = RoundedCornerShape(14.dp)
+                horizontalArrangement = Arrangement.spacedBy(12.dp)
             ) {
-                Text("Copy Output Prompt")
+                // Copy Prompt
+                Button(
+                    onClick = onCopy,
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("Copy", fontSize = 14.sp)
+                }
+
+                // WhatsApp Share
+                Button(
+                    onClick = { shareToWhatsApp(context, prompt.response) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(14.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))
+                ) {
+                    Text("WhatsApp", color = Color.White, fontSize = 13.sp)
+                }
+
+                // Download PDF
+                OutlinedButton(
+                    onClick = {
+                        val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
+                        savePromptAsPdf(context, title, prompt.response)
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(14.dp)
+                ) {
+                    Text("PDF", fontSize = 14.sp)
+                }
             }
         }
     }
