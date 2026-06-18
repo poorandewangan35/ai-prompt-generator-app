@@ -292,11 +292,11 @@ fun ThemeSelector(
                                 .fillMaxWidth()
                                 .height(80.dp)
                                 .clip(RoundedCornerShape(12.dp))
-                                .background(
+                                .then(
                                     if (isSkipOption) {
-                                        MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f)
+                                        Modifier.background(MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.4f))
                                     } else {
-                                        theme.gradient
+                                        Modifier.background(theme.gradient)
                                     }
                                 )
                                 .border(
