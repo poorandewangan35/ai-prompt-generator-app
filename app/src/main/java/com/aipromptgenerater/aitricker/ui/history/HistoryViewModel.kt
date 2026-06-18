@@ -7,6 +7,7 @@ import com.aipromptgenerater.aitricker.data.repository.AuthRepository
 import com.aipromptgenerater.aitricker.data.repository.PromptRepository
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class HistoryViewModel(
     private val authRepository: AuthRepository = AuthRepository(),
@@ -27,4 +28,10 @@ class HistoryViewModel(
             }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
+    fun deletePrompt(promptId: String) {
+        viewModelScope.launch {
+            promptRepository.deletePrompt(promptId)
+        }
+    }
 }

@@ -9,6 +9,7 @@ import com.aipromptgenerater.aitricker.data.repository.PromptRepository
 import com.google.firebase.auth.FirebaseUser
 import kotlinx.coroutines.ExperimentalCoroutinesApi
 import kotlinx.coroutines.flow.*
+import kotlinx.coroutines.launch
 
 class HomeViewModel(
     private val authRepository: AuthRepository = AuthRepository(),
@@ -47,5 +48,11 @@ class HomeViewModel(
 
     fun logout() {
         authRepository.signOut()
+    }
+
+    fun deletePrompt(promptId: String) {
+        viewModelScope.launch {
+            promptRepository.deletePrompt(promptId)
+        }
     }
 }

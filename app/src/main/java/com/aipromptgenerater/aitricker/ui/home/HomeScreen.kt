@@ -177,6 +177,10 @@ fun HomeScreen(
     if (selectedPromptForDetail != null) {
         PromptDetailDialog(
             prompt = selectedPromptForDetail!!,
+            onDelete = {
+                viewModel.deletePrompt(selectedPromptForDetail!!.id)
+                selectedPromptForDetail = null
+            },
             onDismiss = { selectedPromptForDetail = null }
         )
     }
@@ -417,6 +421,7 @@ fun RecentPromptItem(
 @Composable
 fun PromptDetailDialog(
     prompt: PromptHistory,
+    onDelete: () -> Unit,
     onDismiss: () -> Unit
 ) {
     val context = LocalContext.current
@@ -515,12 +520,56 @@ fun PromptDetailDialog(
                     }
                 }
 
-                // Close Button
-                TextButton(
-                    onClick = onDismiss,
-                    modifier = Modifier.align(Alignment.End)
+                // Bottom actions row
+                Row(
+                    modifier = Modifier.fillMaxWidth(),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
-                    Text("Close")
+                    var showConfirmDelete by remember { mutableStateOf(false) }
+
+                    TextButton(
+                        onClick = { showConfirmDelete = true },
+                        colors = ButtonDefaults.textButtonColors(contentColor = MaterialTheme.colorScheme.error)
+                    ) {
+                        Icon(
+                            imageVector = Icons.Default.Delete,
+                            contentDescription = "Delete",
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text("Delete", fontSize = 12.sp)
+                    }
+
+                    TextButton(
+                        onClick = onDismiss
+                    ) {
+                        Text("Close")
+                    }
+
+                    if (showConfirmDelete) {
+                        AlertDialog(
+                            onDismissRequest = { showConfirmDelete = false },
+                            title = { Text("Delete Prompt") },
+                            text = { Text("Are you sure you want to permanently delete this prompt from your history?") },
+                            confirmButton = {
+                                Button(
+                                    onClick = {
+                                        showConfirmDelete = false
+                                        onDelete()
+                                    },
+                                    colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                                ) {
+                                    Text("Delete")
+                                }
+                            },
+                            dismissButton = {
+                                TextButton(onClick = { showConfirmDelete = false }) {
+                                    Text("Cancel")
+                                }
+                            }
+                        )
+                    }
                 }
             }
         }

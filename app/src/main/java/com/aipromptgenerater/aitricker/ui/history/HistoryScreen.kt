@@ -17,6 +17,7 @@ import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
+import androidx.compose.material.icons.filled.Delete
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -116,6 +117,10 @@ fun HistoryScreen(
                 if (selectedPromptDetail != null) {
                     PromptDetailPane(
                         prompt = selectedPromptDetail!!,
+                        onDelete = {
+                            viewModel.deletePrompt(selectedPromptDetail!!.id)
+                            selectedPromptDetail = null
+                        },
                         onClose = { selectedPromptDetail = null }
                     )
                 }
@@ -245,6 +250,7 @@ fun HistoryThreadItem(
 @Composable
 fun PromptDetailPane(
     prompt: PromptHistory,
+    onDelete: () -> Unit,
     onClose: () -> Unit
 ) {
     Surface(
@@ -257,6 +263,8 @@ fun PromptDetailPane(
                 .padding(20.dp)
         ) {
             // Header bar
+            var showConfirmDelete by remember { mutableStateOf(false) }
+
             Row(
                 modifier = Modifier.fillMaxWidth(),
                 verticalAlignment = Alignment.CenterVertically
@@ -275,7 +283,37 @@ fun PromptDetailPane(
                     textAlign = TextAlign.Center
                 )
 
-                Spacer(modifier = Modifier.width(48.dp))
+                IconButton(onClick = { showConfirmDelete = true }) {
+                    Icon(
+                        imageVector = Icons.Default.Delete,
+                        contentDescription = "Delete Prompt",
+                        tint = MaterialTheme.colorScheme.error
+                    )
+                }
+            }
+
+            if (showConfirmDelete) {
+                AlertDialog(
+                    onDismissRequest = { showConfirmDelete = false },
+                    title = { Text("Delete Prompt") },
+                    text = { Text("Are you sure you want to permanently delete this prompt from your history?") },
+                    confirmButton = {
+                        Button(
+                            onClick = {
+                                showConfirmDelete = false
+                                onDelete()
+                            },
+                            colors = ButtonDefaults.buttonColors(containerColor = MaterialTheme.colorScheme.error)
+                        ) {
+                            Text("Delete")
+                        }
+                    },
+                    dismissButton = {
+                        TextButton(onClick = { showConfirmDelete = false }) {
+                            Text("Cancel")
+                        }
+                    }
+                )
             }
 
             Divider(modifier = Modifier.padding(vertical = 12.dp))

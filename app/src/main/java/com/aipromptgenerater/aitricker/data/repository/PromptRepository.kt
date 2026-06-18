@@ -160,4 +160,17 @@ class PromptRepository(
             return Result.failure(e)
         }
     }
+
+    /**
+     * Deletes a prompt history document from Firestore.
+     */
+    suspend fun deletePrompt(promptId: String): Result<Unit> {
+        return try {
+            firestore.collection("prompts").document(promptId).delete().await()
+            Result.success(Unit)
+        } catch (e: Exception) {
+            Log.e(TAG, "Failed to delete prompt $promptId", e)
+            Result.failure(e)
+        }
+    }
 }
