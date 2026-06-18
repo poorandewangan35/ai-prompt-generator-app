@@ -21,6 +21,7 @@ class HistoryViewModel(
         .flatMapLatest { user ->
             if (user != null) {
                 promptRepository.promptHistoryFlow(user.uid)
+                    .catch { emit(emptyList()) }
             } else {
                 flowOf(emptyList())
             }

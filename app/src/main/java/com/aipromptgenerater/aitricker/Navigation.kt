@@ -4,8 +4,9 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Home
-import androidx.compose.material.icons.filled.List
-import androidx.compose.material.icons.filled.ShoppingCart
+import androidx.compose.material.icons.filled.History
+import androidx.compose.material.icons.filled.AccountBalanceWallet
+import androidx.compose.material.icons.filled.Person
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Modifier
@@ -20,6 +21,7 @@ import com.aipromptgenerater.aitricker.ui.generator.GeneratorScreen
 import com.aipromptgenerater.aitricker.ui.history.HistoryScreen
 import com.aipromptgenerater.aitricker.ui.home.HomeScreen
 import com.aipromptgenerater.aitricker.ui.wallet.WalletScreen
+import com.aipromptgenerater.aitricker.ui.profile.ProfileScreen
 
 @Composable
 fun MainNavigation(
@@ -54,7 +56,7 @@ fun MainNavigation(
                             }
                         )
                         NavigationBarItem(
-                            icon = { Icon(Icons.Default.List, contentDescription = "History") },
+                            icon = { Icon(Icons.Default.History, contentDescription = "History") },
                             label = { Text("History") },
                             selected = currentKey == History,
                             onClick = {
@@ -65,13 +67,24 @@ fun MainNavigation(
                             }
                         )
                         NavigationBarItem(
-                            icon = { Icon(Icons.Default.ShoppingCart, contentDescription = "Wallet") },
+                            icon = { Icon(Icons.Default.AccountBalanceWallet, contentDescription = "Wallet") },
                             label = { Text("Wallet") },
                             selected = currentKey == Wallet,
                             onClick = {
                                 if (currentKey != Wallet) {
                                     backStack.clear()
                                     backStack.add(Wallet)
+                                }
+                            }
+                        )
+                        NavigationBarItem(
+                            icon = { Icon(Icons.Default.Person, contentDescription = "Profile") },
+                            label = { Text("Profile") },
+                            selected = currentKey == Profile,
+                            onClick = {
+                                if (currentKey != Profile) {
+                                    backStack.clear()
+                                    backStack.add(Profile)
                                 }
                             }
                         )
@@ -106,6 +119,11 @@ fun MainNavigation(
                     entry<History> {
                         HistoryScreen(
                             onNavigateBack = { backStack.removeLastOrNull() }
+                        )
+                    }
+                    entry<Profile> {
+                        ProfileScreen(
+                            onNavigateToWallet = { backStack.add(Wallet) }
                         )
                     }
                 }

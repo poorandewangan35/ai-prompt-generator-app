@@ -84,7 +84,11 @@ fun HomeScreen(
             item {
                 WalletHeaderCard(
                     credits = userProfile?.credits ?: 0,
-                    email = userProfile?.email ?: "Guest",
+                    name = if (userProfile?.displayName.isNullOrBlank()) {
+                        userProfile?.email ?: "Guest"
+                    } else {
+                        userProfile?.displayName ?: "Guest"
+                    },
                     onBuyClick = onNavigateToWallet
                 )
             }
@@ -107,7 +111,7 @@ fun HomeScreen(
                     GeneratorOptionCard(
                         title = "Website",
                         description = "SaaS, Landing page, E-commerce plans",
-                        icon = Icons.Default.Build,
+                        icon = Icons.Default.Language,
                         backgroundColor = Color(0xFF1E3A8A), // Navy
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigateToGenerator("Website") }
@@ -115,7 +119,7 @@ fun HomeScreen(
                     GeneratorOptionCard(
                         title = "Mobile App",
                         description = "Android, iOS, cross-platform architecture",
-                        icon = Icons.Default.PlayArrow,
+                        icon = Icons.Default.Smartphone,
                         backgroundColor = Color(0xFF0D9488), // Teal
                         modifier = Modifier.weight(1f),
                         onClick = { onNavigateToGenerator("App") }
@@ -178,7 +182,7 @@ fun HomeScreen(
 @Composable
 fun WalletHeaderCard(
     credits: Int,
-    email: String,
+    name: String,
     onBuyClick: () -> Unit
 ) {
     val gradient = Brush.horizontalGradient(
@@ -199,7 +203,7 @@ fun WalletHeaderCard(
                 fontSize = 14.sp
             )
             Text(
-                text = email,
+                text = name,
                 color = Color.White,
                 fontSize = 18.sp,
                 fontWeight = FontWeight.Bold,
@@ -242,19 +246,22 @@ fun WalletHeaderCard(
 
                 Button(
                     onClick = onBuyClick,
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color.White)
+                    shape = RoundedCornerShape(12.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color.White),
+                    contentPadding = PaddingValues(horizontal = 12.dp, vertical = 6.dp),
+                    modifier = Modifier.height(36.dp)
                 ) {
                     Icon(
                         imageVector = Icons.Default.Add,
                         contentDescription = "Add",
                         tint = Color(0xFF1E3A8A),
-                        modifier = Modifier.size(16.dp)
+                        modifier = Modifier.size(14.dp)
                     )
                     Spacer(modifier = Modifier.width(4.dp))
                     Text(
                         text = "Add Credits",
                         color = Color(0xFF1E3A8A),
+                        fontSize = 12.sp,
                         fontWeight = FontWeight.Bold
                     )
                 }
@@ -336,7 +343,8 @@ fun RecentPromptItem(
             verticalAlignment = Alignment.CenterVertically
         ) {
             // Type Icon Indicator
-            val iconBg = if (prompt.type.lowercase() == "app") Color(0xFF0D9488) else Color(0xFF1E3A8A)
+            val isApp = (prompt.type ?: "").lowercase() == "app"
+            val iconBg = if (isApp) Color(0xFF0D9488) else Color(0xFF1E3A8A)
             Box(
                 modifier = Modifier
                     .size(48.dp)
@@ -345,8 +353,8 @@ fun RecentPromptItem(
                 contentAlignment = Alignment.Center
             ) {
                 Icon(
-                    imageVector = if (prompt.type.lowercase() == "app") Icons.Default.PlayArrow else Icons.Default.Build,
-                    contentDescription = prompt.type,
+                    imageVector = if (isApp) Icons.Default.Smartphone else Icons.Default.Language,
+                    contentDescription = prompt.type ?: "",
                     tint = iconBg,
                     modifier = Modifier.size(24.dp)
                 )

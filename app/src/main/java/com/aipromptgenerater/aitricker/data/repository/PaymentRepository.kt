@@ -6,6 +6,7 @@ import android.util.Log
 import com.aipromptgenerater.aitricker.data.model.SystemConfig
 import com.aipromptgenerater.aitricker.data.remote.RazorpayClient
 import com.aipromptgenerater.aitricker.data.remote.RazorpayResultBridge
+import com.aipromptgenerater.aitricker.data.remote.CashfreeClient
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
 import kotlinx.coroutines.tasks.await
@@ -13,7 +14,8 @@ import java.util.UUID
 
 class PaymentRepository(
     private val firestore: FirebaseFirestore = FirebaseFirestore.getInstance(),
-    private val razorpayClient: RazorpayClient = RazorpayClient()
+    private val razorpayClient: RazorpayClient = RazorpayClient(),
+    private val cashfreeClient: CashfreeClient = CashfreeClient()
 ) {
 
     companion object {
@@ -55,13 +57,14 @@ class PaymentRepository(
     }
 
     /**
-     * Initializes Razorpay checkout.
+     * Initializes payment gateway checkout.
      * Launches payment screen on sandbox/production environment.
      */
     suspend fun checkout(
         context: Context,
         userId: String,
         plan: PaymentPlan,
+        gateway: String, // "Razorpay" or "Cashfree"
         isSandboxMode: Boolean,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
@@ -69,44 +72,70 @@ class PaymentRepository(
         try {
             val activity = context as? Activity
             if (activity == null) {
-                onFailure("Context is not an Activity. Cannot open Razorpay Checkout.")
+                onFailure("Context is not an Activity. Cannot open Payment Gateway.")
                 return
             }
 
-            // 1. Fetch Key ID configurations dynamically from Firestore config
+            // Fetch credentials dynamically from Firestore config
             val systemConfig = loadSystemConfig()
-            val razorpayKeyId = if (isSandboxMode) {
-                systemConfig.razorpayKeyIdSandbox
-            } else {
-                systemConfig.razorpayKeyIdProduction
-            }
 
             // Fetch user info from Firebase Auth
             val firebaseUser = FirebaseAuth.getInstance().currentUser
             val email = firebaseUser?.email ?: "user@aiprompt.com"
             val phone = firebaseUser?.phoneNumber ?: "9999999999"
 
-            // 2. Setup SDK callback bridges
-            RazorpayResultBridge.onSuccess = { paymentId ->
-                Log.i(TAG, "Razorpay payment success event for: $paymentId")
-                verifyAndFulfillPayment(userId, paymentId, plan.credits, onSuccess, onFailure)
-            }
+            if (gateway == "Cashfree") {
+                val appId = if (isSandboxMode) systemConfig.cashfreeAppIdSandbox else systemConfig.cashfreeAppIdProduction
+                val secretKey = if (isSandboxMode) systemConfig.cashfreeSecretKeySandbox else systemConfig.cashfreeSecretKeyProduction
 
-            RazorpayResultBridge.onFailure = { code, response ->
-                Log.w(TAG, "Razorpay payment failed. Code: $code, Response: $response")
-                onFailure(response)
-            }
+                cashfreeClient.startPayment(
+                    context = context,
+                    appId = appId,
+                    secretKey = secretKey,
+                    amount = plan.price.toDouble(),
+                    credits = plan.credits,
+                    userId = userId,
+                    userEmail = email,
+                    userPhone = phone,
+                    isSandbox = isSandboxMode,
+                    onSuccess = { paymentId ->
+                        Log.i(TAG, "Cashfree payment success event for: $paymentId")
+                        verifyAndFulfillPayment(userId, paymentId, plan.credits, onSuccess, onFailure)
+                    },
+                    onFailure = { errorMessage ->
+                        Log.w(TAG, "Cashfree payment failed: $errorMessage")
+                        onFailure(errorMessage)
+                    }
+                )
+            } else {
+                val razorpayKeyId = if (isSandboxMode) {
+                    systemConfig.razorpayKeyIdSandbox
+                } else {
+                    systemConfig.razorpayKeyIdProduction
+                }
 
-            // 3. Launch Razorpay Standard Checkout
-            razorpayClient.startPayment(
-                activity = activity,
-                keyId = razorpayKeyId,
-                amount = plan.price.toDouble(),
-                credits = plan.credits,
-                planLabel = plan.label,
-                userEmail = email,
-                userPhone = phone
-            )
+                // Setup SDK callback bridges
+                RazorpayResultBridge.onSuccess = { paymentId ->
+                    Log.i(TAG, "Razorpay payment success event for: $paymentId")
+                    verifyAndFulfillPayment(userId, paymentId, plan.credits, onSuccess, onFailure)
+                }
+
+                RazorpayResultBridge.onFailure = { code, response ->
+                    Log.w(TAG, "Razorpay payment failed. Code: $code, Response: $response")
+                    onFailure(response)
+                }
+
+                // Launch Razorpay Standard Checkout
+                razorpayClient.startPayment(
+                    activity = activity,
+                    keyId = razorpayKeyId,
+                    amount = plan.price.toDouble(),
+                    credits = plan.credits,
+                    planLabel = plan.label,
+                    userEmail = email,
+                    userPhone = phone
+                )
+            }
 
         } catch (e: Exception) {
             Log.e(TAG, "Checkout process exception", e)

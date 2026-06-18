@@ -148,14 +148,15 @@ fun HistoryThreadItem(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Type Header Badge
-                val badgeColor = if (prompt.type.lowercase() == "app") Color(0xFF0D9488) else Color(0xFF1E3A8A)
+                val isApp = (prompt.type ?: "").lowercase() == "app"
+                val badgeColor = if (isApp) Color(0xFF0D9488) else Color(0xFF1E3A8A)
                 Surface(
                     color = badgeColor.copy(alpha = 0.15f),
                     contentColor = badgeColor,
                     shape = RoundedCornerShape(8.dp)
                 ) {
                     Text(
-                        text = prompt.type.uppercase(),
+                        text = (prompt.type ?: "").uppercase(),
                         fontSize = 9.sp,
                         fontWeight = FontWeight.Black,
                         modifier = Modifier.padding(horizontal = 8.dp, vertical = 2.dp)

@@ -18,10 +18,17 @@ import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.text.input.PasswordVisualTransformation
+import androidx.compose.ui.res.painterResource
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.lifecycle.viewmodel.compose.viewModel
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
+import com.google.android.gms.auth.api.signin.GoogleSignIn
+import com.google.android.gms.auth.api.signin.GoogleSignInOptions
+import com.google.android.gms.common.api.ApiException
+import com.google.firebase.auth.GoogleAuthProvider
 import com.aipromptgenerater.aitricker.ui.components.GradientBackground
 import com.aipromptgenerater.aitricker.ui.components.GradientButton
 import com.aipromptgenerater.aitricker.ui.components.PremiumCard
@@ -36,6 +43,48 @@ fun AuthScreen(
     var email by remember { mutableStateOf("") }
     var password by remember { mutableStateOf("") }
     var isSignUp by remember { mutableStateOf(false) }
+
+    val context = androidx.compose.ui.platform.LocalContext.current
+
+    // Initialize Google Sign-In Options
+    val gso = remember {
+        val webClientId = try {
+            context.getString(com.aipromptgenerater.aitricker.R.string.default_web_client_id)
+        } catch (e: Exception) {
+            "617840242417-h0p6gsavbq4buluomi4atdt0uqdigq4f.apps.googleusercontent.com"
+        }
+        GoogleSignInOptions.Builder(GoogleSignInOptions.DEFAULT_SIGN_IN)
+            .requestIdToken(webClientId)
+            .requestEmail()
+            .build()
+    }
+
+    val googleSignInClient = remember {
+        GoogleSignIn.getClient(context, gso)
+    }
+
+    // Google Sign-In Activity Result Launcher
+    val googleSignInLauncher = rememberLauncherForActivityResult(
+        contract = ActivityResultContracts.StartActivityForResult()
+    ) { result ->
+        if (result.resultCode == android.app.Activity.RESULT_OK) {
+            val task = GoogleSignIn.getSignedInAccountFromIntent(result.data)
+            try {
+                val account = task.getResult(ApiException::class.java)
+                val idToken = account.idToken
+                if (idToken != null) {
+                    val credential = GoogleAuthProvider.getCredential(idToken, null)
+                    viewModel.signInWithGoogle(credential)
+                } else {
+                    viewModel.setError("Google sign-in ID Token is missing.")
+                }
+            } catch (e: ApiException) {
+                viewModel.setError("Google sign-in failed: ${e.localizedMessage ?: "Unknown error"}")
+            }
+        } else {
+            viewModel.setError("Google Sign-In was cancelled or failed.")
+        }
+    }
 
     LaunchedEffect(uiState) {
         if (uiState is AuthUiState.Success || uiState is AuthUiState.SuccessMock) {
@@ -203,16 +252,14 @@ fun AuthScreen(
                     HorizontalDivider(modifier = Modifier.weight(1f), color = Color.White.copy(alpha = 0.3f))
                 }
 
-                // Google Sign In (Mocked / Integrated UI)
+                // Google Sign In (Real Integrated UI)
                 Card(
                     modifier = Modifier
                         .fillMaxWidth()
                         .height(56.dp)
                         .clickable {
-                            // Note: Google Sign-In SDK requires configuration client-side.
-                            // We trigger the Mock Authentication pipeline for immediate testing validation,
-                            // while leaving hooks for production authentication.
-                            viewModel.signInMock()
+                            viewModel.clearError()
+                            googleSignInLauncher.launch(googleSignInClient.signInIntent)
                         },
                     shape = RoundedCornerShape(16.dp),
                     colors = CardDefaults.cardColors(containerColor = Color.White),
@@ -223,6 +270,13 @@ fun AuthScreen(
                         verticalAlignment = Alignment.CenterVertically,
                         horizontalArrangement = Arrangement.Center
                     ) {
+                        Icon(
+                            painter = painterResource(id = com.aipromptgenerater.aitricker.R.drawable.ic_google),
+                            contentDescription = "Google Icon",
+                            tint = Color.Unspecified,
+                            modifier = Modifier.size(22.dp)
+                        )
+                        Spacer(modifier = Modifier.width(12.dp))
                         // Styled Logo / Text
                         Text(
                             text = "Continue with Google",

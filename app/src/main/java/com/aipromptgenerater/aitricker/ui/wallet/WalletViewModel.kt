@@ -28,7 +28,12 @@ class WalletViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val userProfile: StateFlow<UserProfile?> = currentUser
         .flatMapLatest { user ->
-            if (user != null) authRepository.userProfileFlow(user.uid) else flowOf(null)
+            if (user != null) {
+                authRepository.userProfileFlow(user.uid)
+                    .catch { emit(null) }
+            } else {
+                flowOf(null)
+            }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
@@ -44,9 +49,9 @@ class WalletViewModel(
     }
 
     /**
-     * Launches checkout via Razorpay SDK.
+     * Launches checkout via Razorpay or Cashfree.
      */
-    fun purchasePlan(context: Context, plan: PaymentPlan, isSandbox: Boolean) {
+    fun purchasePlan(context: Context, plan: PaymentPlan, gateway: String, isSandbox: Boolean) {
         val user = currentUser.value
         if (user == null) {
             _paymentState.value = PaymentState.Error("Session expired. Please log in.")
@@ -59,6 +64,7 @@ class WalletViewModel(
                 context = context,
                 userId = user.uid,
                 plan = plan,
+                gateway = gateway,
                 isSandboxMode = isSandbox,
                 onSuccess = { successMessage ->
                     _paymentState.value = PaymentState.Success(successMessage)

@@ -39,6 +39,7 @@ fun WalletScreen(
     val paymentState by viewModel.paymentState.collectAsState()
 
     var isSandboxMode by remember { mutableStateOf(true) } // Default to sandbox/simulation for easy testing!
+    var selectedGateway by remember { mutableStateOf("Cashfree") } // Default to Cashfree
 
     LaunchedEffect(paymentState) {
         if (paymentState is PaymentState.Success) {
@@ -77,7 +78,7 @@ fun WalletScreen(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Opening Razorpay Secure Gateway...",
+                            text = "Opening Secure Gateway...",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -94,6 +95,63 @@ fun WalletScreen(
                     // Current Balance Header
                     BalanceBanner(credits = userProfile?.credits ?: 0)
 
+                    // Payment Gateway Selector
+                    Card(
+                        modifier = Modifier.fillMaxWidth(),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
+                        )
+                    ) {
+                        Column(modifier = Modifier.padding(16.dp)) {
+                            Text(
+                                text = "Select Payment Gateway",
+                                fontSize = 14.sp,
+                                fontWeight = FontWeight.Bold,
+                                color = MaterialTheme.colorScheme.onSurface
+                            )
+                            Spacer(modifier = Modifier.height(12.dp))
+                            Row(
+                                modifier = Modifier.fillMaxWidth(),
+                                horizontalArrangement = Arrangement.spacedBy(12.dp)
+                            ) {
+                                val isCf = selectedGateway == "Cashfree"
+                                Button(
+                                    onClick = { selectedGateway = "Cashfree" },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isCf) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = "Cashfree (Primary)",
+                                        color = if (isCf) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+
+                                val isRzp = selectedGateway == "Razorpay"
+                                Button(
+                                    onClick = { selectedGateway = "Razorpay" },
+                                    colors = ButtonDefaults.buttonColors(
+                                        containerColor = if (isRzp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
+                                    ),
+                                    shape = RoundedCornerShape(12.dp),
+                                    modifier = Modifier.weight(1f)
+                                ) {
+                                    Text(
+                                        text = "Razorpay",
+                                        color = if (isRzp) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
+                                        fontWeight = FontWeight.Bold,
+                                        fontSize = 12.sp
+                                    )
+                                }
+                            }
+                        }
+                    }
+
                     Text(
                         text = "Select Credit Package",
                         fontSize = 18.sp,
@@ -105,13 +163,24 @@ fun WalletScreen(
                     plans.forEach { plan ->
                         PlanPurchaseCard(
                             plan = plan,
-                            onPurchase = { viewModel.purchasePlan(context, plan, isSandboxMode) }
+                            onPurchase = { viewModel.purchasePlan(context, plan, selectedGateway, isSandboxMode) }
                         )
                     }
 
                     // Sandbox simulation toggle
-                    PremiumCard(
-                        backgroundColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.5f)
+                    Card(
+                        modifier = Modifier
+                            .fillMaxWidth()
+                            .border(
+                                width = 1.dp,
+                                color = MaterialTheme.colorScheme.outlineVariant,
+                                shape = RoundedCornerShape(20.dp)
+                            ),
+                        shape = RoundedCornerShape(20.dp),
+                        colors = CardDefaults.cardColors(
+                            containerColor = MaterialTheme.colorScheme.surface
+                        ),
+                        elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
                         Row(
                             modifier = Modifier
@@ -124,8 +193,10 @@ fun WalletScreen(
                                 Text(
                                     text = "Sandbox Mock Mode",
                                     fontWeight = FontWeight.Bold,
-                                    fontSize = 14.sp
+                                    fontSize = 14.sp,
+                                    color = MaterialTheme.colorScheme.onSurface
                                 )
+                                Spacer(modifier = Modifier.height(4.dp))
                                 Text(
                                     text = "Simulates Razorpay gateway checkouts using test API keys, adding credits immediately.",
                                     fontSize = 11.sp,
@@ -133,6 +204,7 @@ fun WalletScreen(
                                     color = MaterialTheme.colorScheme.onSurfaceVariant.copy(alpha = 0.8f)
                                 )
                             }
+                            Spacer(modifier = Modifier.width(16.dp))
                             Switch(
                                 checked = isSandboxMode,
                                 onCheckedChange = { isSandboxMode = it }
@@ -213,27 +285,31 @@ fun PlanPurchaseCard(
     onPurchase: () -> Unit
 ) {
     val isPopular = plan.tag.isNotEmpty()
-    val borderBrush = if (isPopular) {
-        Brush.horizontalGradient(colors = listOf(Color(0xFF3B82F6), Color(0xFF06B6D4)))
-    } else {
-        Brush.linearGradient(colors = listOf(Color.White.copy(alpha = 0.15f), Color.White.copy(alpha = 0.05f)))
-    }
+
+    val perCreditCost = if (plan.credits > 0) plan.price.toDouble() / plan.credits else 0.0
+    val perCreditText = String.format("₹%.2f per credit", perCreditCost)
 
     Card(
         modifier = Modifier
             .fillMaxWidth()
-            .border(
-                width = if (isPopular) 2.dp else 1.dp,
-                brush = borderBrush,
-                shape = RoundedCornerShape(24.dp)
+            .then(
+                if (isPopular) {
+                    Modifier.border(
+                        width = 2.dp,
+                        brush = Brush.horizontalGradient(colors = listOf(Color(0xFF3B82F6), Color(0xFF06B6D4))),
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                } else {
+                    Modifier.border(
+                        width = 1.dp,
+                        color = MaterialTheme.colorScheme.outlineVariant,
+                        shape = RoundedCornerShape(24.dp)
+                    )
+                }
             ),
         shape = RoundedCornerShape(24.dp),
         colors = CardDefaults.cardColors(
-            containerColor = if (isPopular) {
-                MaterialTheme.colorScheme.surface
-            } else {
-                MaterialTheme.colorScheme.surface.copy(alpha = 0.8f)
-            }
+            containerColor = MaterialTheme.colorScheme.surface
         ),
         elevation = CardDefaults.cardElevation(defaultElevation = if (isPopular) 6.dp else 2.dp)
     ) {
@@ -294,19 +370,28 @@ fun PlanPurchaseCard(
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 // Features listed inside card
-                Row(verticalAlignment = Alignment.CenterVertically) {
-                    Icon(
-                        imageVector = Icons.Default.CheckCircle,
-                        contentDescription = "Feature",
-                        tint = Color(0xFF0D9488),
-                        modifier = Modifier.size(16.dp)
-                    )
-                    Spacer(modifier = Modifier.width(4.dp))
+                Column {
+                    Row(verticalAlignment = Alignment.CenterVertically) {
+                        Icon(
+                            imageVector = Icons.Default.CheckCircle,
+                            contentDescription = "Feature",
+                            tint = Color(0xFF0D9488),
+                            modifier = Modifier.size(16.dp)
+                        )
+                        Spacer(modifier = Modifier.width(4.dp))
+                        Text(
+                            text = "${plan.credits} prompt credits",
+                            fontSize = 13.sp,
+                            fontWeight = FontWeight.SemiBold,
+                            color = MaterialTheme.colorScheme.onSurface
+                        )
+                    }
+                    Spacer(modifier = Modifier.height(2.dp))
                     Text(
-                        text = "${plan.credits} prompt credits",
-                        fontSize = 13.sp,
-                        fontWeight = FontWeight.SemiBold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        text = perCreditText,
+                        fontSize = 11.sp,
+                        color = MaterialTheme.colorScheme.onSurface.copy(alpha = 0.5f),
+                        modifier = Modifier.padding(start = 20.dp)
                     )
                 }
 

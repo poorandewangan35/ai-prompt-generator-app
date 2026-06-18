@@ -29,7 +29,10 @@ export default function LoginView() {
   return (
     <div className="login-container">
       <div className="login-card">
-        <h1 className="login-logo">Prompt Architect</h1>
+        <div className="login-logo-container">
+          <img src="/logo.png" alt="Logo" className="login-logo-img" />
+          <h1 className="login-logo">Prompt Architect</h1>
+        </div>
         <p className="login-subtitle">System Admin Dashboard Control Gate</p>
 
         <form onSubmit={handleLogin}>

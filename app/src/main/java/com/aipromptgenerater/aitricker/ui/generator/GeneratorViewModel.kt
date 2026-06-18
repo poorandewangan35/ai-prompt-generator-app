@@ -25,7 +25,12 @@ class GeneratorViewModel(
     @OptIn(ExperimentalCoroutinesApi::class)
     val userProfile: StateFlow<UserProfile?> = currentUser
         .flatMapLatest { user ->
-            if (user != null) authRepository.userProfileFlow(user.uid) else flowOf(null)
+            if (user != null) {
+                authRepository.userProfileFlow(user.uid)
+                    .catch { emit(null) }
+            } else {
+                flowOf(null)
+            }
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 

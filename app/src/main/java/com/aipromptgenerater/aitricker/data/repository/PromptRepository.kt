@@ -92,7 +92,7 @@ class PromptRepository(
             // 2. Fetch OpenRouter credentials securely from Firestore config
             val configDoc = firestore.collection("config").document("system").get().await()
             val apiKey = configDoc.getString("openRouterApiKey") ?: OPENROUTER_API_KEY_FALLBACK
-            val model = configDoc.getString("openRouterModel") ?: "google/gemini-2.0-flash-lite:free"
+            val model = configDoc.getString("openRouterModel") ?: "google/gemini-2.5-flash-lite:free"
 
             // 3. Fetch system instruction
             val systemConfig = getSystemConfig()

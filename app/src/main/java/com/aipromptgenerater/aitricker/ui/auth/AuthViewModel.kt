@@ -28,6 +28,7 @@ class AuthViewModel(
         .flatMapLatest { user ->
             if (user != null) {
                 authRepository.userProfileFlow(user.uid)
+                    .catch { emit(null) }
             } else {
                 flowOf(null)
             }
@@ -114,6 +115,10 @@ class AuthViewModel(
         if (_uiState.value is AuthUiState.Error) {
             _uiState.value = AuthUiState.Idle
         }
+    }
+
+    fun setError(message: String) {
+        _uiState.value = AuthUiState.Error(message)
     }
 }
 

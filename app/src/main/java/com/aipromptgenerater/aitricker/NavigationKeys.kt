@@ -14,3 +14,6 @@ data object Wallet : NavKey
 
 @Serializable
 data object History : NavKey
+
+@Serializable
+data object Profile : NavKey

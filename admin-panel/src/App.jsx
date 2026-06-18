@@ -65,7 +65,10 @@ export default function App() {
       {/* Sidebar Navigation */}
       <aside className="sidebar">
         <div>
-          <div className="sidebar-logo">Prompt Architect</div>
+          <div className="sidebar-logo-container">
+            <img src="/logo.png" alt="Logo" className="sidebar-logo-img" />
+            <div className="sidebar-logo">Prompt Architect</div>
+          </div>
           
           {/* Theme Toggle Button */}
           <div className="theme-toggle-btn" onClick={toggleTheme}>
