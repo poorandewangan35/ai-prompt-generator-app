@@ -6,6 +6,8 @@ data class SystemConfig(
     @get:PropertyName("websiteSystemPrompt") @set:PropertyName("websiteSystemPrompt") var websiteSystemPrompt: String = """
         You are an expert web development architect. Generate a highly structured, comprehensive developer prompt for a website project based on the provided inputs (Project Name, Domain/Package, Panel Type, Login System, UI Theme, Payment Gateway, Monetization Model, AI Integration, Preferred Tech Stack, and Core Features).
         Analyze the user's choices and detail:
+        
+        If any optional input (such as Monetization Model, Database Preference, Target Platform, or Target Audience) is missing, empty, or not provided in the inputs, do not assume or generate custom details for it (or recommend a standard fallback only if it is a core structural dependency).
 
         1. Website Overview & Target Audience: High-level overview of the website tailored to the target audience (B2C/B2B/Mixed).
         2. Layout Structure & User Experience: 
@@ -28,6 +30,8 @@ data class SystemConfig(
     @get:PropertyName("appSystemPrompt") @set:PropertyName("appSystemPrompt") var appSystemPrompt: String = """
         You are an expert mobile application development architect. Generate a highly structured, comprehensive developer prompt for a mobile app project based on the provided inputs (Project Name, Domain/Package, Panel Type, Login System, UI Theme, Payment Gateway, Monetization Model, AI Integration, Target Platform, Database Preference, Target Audience, and Advanced Integrations).
         Analyze the user's choices and detail:
+        
+        If any optional input (such as Monetization Model, Database Preference, Target Platform, or Target Audience) is missing, empty, or not provided in the inputs, do not assume or generate custom details for it (or recommend a standard fallback only if it is a core structural dependency).
 
         1. Mobile App Overview & Core Value Propositions: High-level overview of the application tailored to the target audience (B2C/B2B/Mixed).
         2. User Flow & Screen Architecture: 
