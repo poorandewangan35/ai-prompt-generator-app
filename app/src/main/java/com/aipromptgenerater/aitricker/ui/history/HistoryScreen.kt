@@ -116,13 +116,7 @@ fun HistoryScreen(
                 if (selectedPromptDetail != null) {
                     PromptDetailPane(
                         prompt = selectedPromptDetail!!,
-                        onClose = { selectedPromptDetail = null },
-                        onCopy = {
-                            val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-                            val clip = ClipData.newPlainText("AI Generated Prompt", selectedPromptDetail!!.response)
-                            clipboard.setPrimaryClip(clip)
-                            Toast.makeText(context, "Prompt copied!", Toast.LENGTH_SHORT).show()
-                        }
+                        onClose = { selectedPromptDetail = null }
                     )
                 }
             }
@@ -140,6 +134,7 @@ fun HistoryThreadItem(
         System.currentTimeMillis(),
         DateUtils.MINUTE_IN_MILLIS
     ).toString()
+    val context = LocalContext.current
 
     PremiumCard(
         modifier = Modifier.clickable { onClick() }
@@ -194,6 +189,55 @@ fun HistoryThreadItem(
                 overflow = TextOverflow.Ellipsis,
                 lineHeight = 16.sp
             )
+
+            Spacer(modifier = Modifier.height(12.dp))
+
+            Row(
+                modifier = Modifier
+                    .fillMaxWidth()
+                    .height(36.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp)
+            ) {
+                // Copy Prompt
+                Button(
+                    onClick = { copyToClipboard(context, prompt.response) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    Text("Copy", fontSize = 12.sp)
+                }
+
+                // WhatsApp Share
+                Button(
+                    onClick = { shareToWhatsApp(context, prompt.response) },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(10.dp),
+                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    Text("WhatsApp", color = Color.White, fontSize = 11.sp)
+                }
+
+                // Download PDF
+                OutlinedButton(
+                    onClick = {
+                        val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
+                        savePromptAsPdf(context, title, prompt.response)
+                    },
+                    modifier = Modifier
+                        .weight(1f)
+                        .fillMaxHeight(),
+                    shape = RoundedCornerShape(10.dp),
+                    contentPadding = PaddingValues(horizontal = 4.dp)
+                ) {
+                    Text("PDF", fontSize = 12.sp)
+                }
+            }
         }
     }
 }
@@ -201,10 +245,8 @@ fun HistoryThreadItem(
 @Composable
 fun PromptDetailPane(
     prompt: PromptHistory,
-    onClose: () -> Unit,
-    onCopy: () -> Unit
+    onClose: () -> Unit
 ) {
-    val context = LocalContext.current
     Surface(
         modifier = Modifier.fillMaxSize(),
         color = MaterialTheme.colorScheme.background
@@ -217,7 +259,6 @@ fun PromptDetailPane(
             // Header bar
             Row(
                 modifier = Modifier.fillMaxWidth(),
-                horizontalArrangement = Arrangement.SpaceBetween,
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 IconButton(onClick = onClose) {
@@ -234,9 +275,7 @@ fun PromptDetailPane(
                     textAlign = TextAlign.Center
                 )
 
-                IconButton(onClick = onCopy) {
-                    Icon(imageVector = Icons.Default.Share, contentDescription = "Copy Prompt")
-                }
+                Spacer(modifier = Modifier.width(48.dp))
             }
 
             Divider(modifier = Modifier.padding(vertical = 12.dp))
@@ -324,52 +363,6 @@ fun PromptDetailPane(
                             )
                         }
                     }
-                }
-            }
-
-            Spacer(modifier = Modifier.height(16.dp))
-
-            Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(50.dp),
-                horizontalArrangement = Arrangement.spacedBy(12.dp)
-            ) {
-                // Copy Prompt
-                Button(
-                    onClick = onCopy,
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text("Copy", fontSize = 14.sp)
-                }
-
-                // WhatsApp Share
-                Button(
-                    onClick = { shareToWhatsApp(context, prompt.response) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(14.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366))
-                ) {
-                    Text("WhatsApp", color = Color.White, fontSize = 13.sp)
-                }
-
-                // Download PDF
-                OutlinedButton(
-                    onClick = {
-                        val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
-                        savePromptAsPdf(context, title, prompt.response)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(14.dp)
-                ) {
-                    Text("PDF", fontSize = 14.sp)
                 }
             }
         }
