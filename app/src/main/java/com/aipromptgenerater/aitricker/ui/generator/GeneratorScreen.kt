@@ -704,7 +704,7 @@ fun GeneratorScreen(
                             // 5.5 Monetization Model Card
                             OptionGroupCard(
                                 icon = Icons.Default.AttachMoney,
-                                title = "Monetization Model"
+                                title = "Monetization Model (Optional)"
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     SegmentedOptionRow(
