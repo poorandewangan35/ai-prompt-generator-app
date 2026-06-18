@@ -395,7 +395,7 @@ fun GeneratorScreen(
     var paymentGateway by remember { mutableStateOf("Razorpay") }
     var isPaymentHelpExpanded by remember { mutableStateOf(false) }
 
-    var monetizationModel by remember { mutableStateOf("Product Based (like Amazon)") }
+    var monetizationModel by remember { mutableStateOf("Let AI Choose (Skip)") }
     var isMonetizationHelpExpanded by remember { mutableStateOf(false) }
 
     var aiIntegration by remember { mutableStateOf("Let AI Choose (Skip)") }
@@ -522,7 +522,7 @@ fun GeneratorScreen(
                             authSystem = "Google Login"
                             uiTheme = "Let AI Choose (Skip)"
                             paymentGateway = "Razorpay"
-                            monetizationModel = "Product Based (like Amazon)"
+                            monetizationModel = "Let AI Choose (Skip)"
                             isMonetizationHelpExpanded = false
                             preferredTechStack = ""
                             targetPlatform = "Not Specified"
@@ -708,54 +708,21 @@ fun GeneratorScreen(
                             ) {
                                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                                     SegmentedOptionRow(
-                                        options = listOf("Credit Pack (Basic / Pro / Premium)", "Product Based (like Amazon)"),
+                                        options = listOf("Let AI Choose (Skip)", "Credit Pack (Basic / Pro / Premium)"),
                                         selectedOption = monetizationModel,
                                         onOptionSelected = { monetizationModel = it }
                                     )
-                                    Row(
-                                        modifier = Modifier.fillMaxWidth(),
-                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
-                                    ) {
-                                        val isSelected = monetizationModel == "Service Based (Appointments / Booking)"
-                                        Button(
-                                            onClick = { monetizationModel = "Service Based (Appointments / Booking)" },
-                                            colors = ButtonDefaults.buttonColors(
-                                                containerColor = if (isSelected) Color(0xFFB2DFDB) else Color.White
-                                            ),
-                                            shape = RoundedCornerShape(12.dp),
-                                            border = BorderStroke(1.dp, if (isSelected) Color(0xFF004D40) else Color(0xFFCCCCCC)),
-                                            modifier = Modifier.weight(1f),
-                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
-                                        ) {
-                                            Row(
-                                                verticalAlignment = Alignment.CenterVertically,
-                                                horizontalArrangement = Arrangement.Center
-                                            ) {
-                                                if (isSelected) {
-                                                    Icon(
-                                                        imageVector = Icons.Default.Check,
-                                                        contentDescription = "Selected",
-                                                        tint = Color(0xFF004D40),
-                                                        modifier = Modifier.size(16.dp)
-                                                    )
-                                                    Spacer(modifier = Modifier.width(4.dp))
-                                                }
-                                                Text(
-                                                    text = "Service Based (Appointments / Booking)",
-                                                    color = if (isSelected) Color(0xFF004D40) else Color.Gray,
-                                                    fontWeight = FontWeight.Bold,
-                                                    fontSize = 12.sp,
-                                                    textAlign = TextAlign.Center
-                                                )
-                                            }
-                                        }
-                                        Spacer(modifier = Modifier.weight(1f))
-                                    }
+                                    SegmentedOptionRow(
+                                        options = listOf("Product Based (like Amazon)", "Service Based (Appointments / Booking)"),
+                                        selectedOption = monetizationModel,
+                                        onOptionSelected = { monetizationModel = it }
+                                    )
                                 }
                                 HelpTextDropdown(
                                     isExpanded = isMonetizationHelpExpanded,
                                     onToggle = { isMonetizationHelpExpanded = !isMonetizationHelpExpanded },
                                     content = when (monetizationModel) {
+                                        "Let AI Choose (Skip)" -> "Analyzes your project idea to recommend the most optimal monetization model (credits, products, or appointments)."
                                         "Credit Pack (Basic / Pro / Premium)" -> "Allows users to buy credit packages to consume services inside the app. Ideal for token-based, AI usage, or query-based products."
                                         "Product Based (like Amazon)" -> "Includes a shopping cart, catalog, checkouts, and order management to sell physical or digital inventory."
                                         else -> "Enables appointment scheduling, calendar integrations, and booking workflows to sell time slots or professional services."
