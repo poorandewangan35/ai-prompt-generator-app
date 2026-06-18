@@ -49,9 +49,9 @@ class WalletViewModel(
     }
 
     /**
-     * Launches checkout via Razorpay or Cashfree.
+     * Launches checkout via Razorpay SDK.
      */
-    fun purchasePlan(context: Context, plan: PaymentPlan, gateway: String, isSandbox: Boolean) {
+    fun purchasePlan(context: Context, plan: PaymentPlan, isSandbox: Boolean) {
         val user = currentUser.value
         if (user == null) {
             _paymentState.value = PaymentState.Error("Session expired. Please log in.")
@@ -64,7 +64,6 @@ class WalletViewModel(
                 context = context,
                 userId = user.uid,
                 plan = plan,
-                gateway = gateway,
                 isSandboxMode = isSandbox,
                 onSuccess = { successMessage ->
                     _paymentState.value = PaymentState.Success(successMessage)

@@ -39,7 +39,6 @@ fun WalletScreen(
     val paymentState by viewModel.paymentState.collectAsState()
 
     var isSandboxMode by remember { mutableStateOf(true) } // Default to sandbox/simulation for easy testing!
-    var selectedGateway by remember { mutableStateOf("Cashfree") } // Default to Cashfree
 
     LaunchedEffect(paymentState) {
         if (paymentState is PaymentState.Success) {
@@ -78,7 +77,7 @@ fun WalletScreen(
                         CircularProgressIndicator(color = MaterialTheme.colorScheme.primary)
                         Spacer(modifier = Modifier.height(16.dp))
                         Text(
-                            text = "Opening Secure Gateway...",
+                            text = "Opening Razorpay Secure Gateway...",
                             fontSize = 15.sp,
                             fontWeight = FontWeight.Medium
                         )
@@ -95,63 +94,6 @@ fun WalletScreen(
                     // Current Balance Header
                     BalanceBanner(credits = userProfile?.credits ?: 0)
 
-                    // Payment Gateway Selector
-                    Card(
-                        modifier = Modifier.fillMaxWidth(),
-                        shape = RoundedCornerShape(20.dp),
-                        colors = CardDefaults.cardColors(
-                            containerColor = MaterialTheme.colorScheme.surfaceVariant.copy(alpha = 0.3f)
-                        )
-                    ) {
-                        Column(modifier = Modifier.padding(16.dp)) {
-                            Text(
-                                text = "Select Payment Gateway",
-                                fontSize = 14.sp,
-                                fontWeight = FontWeight.Bold,
-                                color = MaterialTheme.colorScheme.onSurface
-                            )
-                            Spacer(modifier = Modifier.height(12.dp))
-                            Row(
-                                modifier = Modifier.fillMaxWidth(),
-                                horizontalArrangement = Arrangement.spacedBy(12.dp)
-                            ) {
-                                val isCf = selectedGateway == "Cashfree"
-                                Button(
-                                    onClick = { selectedGateway = "Cashfree" },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isCf) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                                    ),
-                                    shape = RoundedCornerShape(12.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(
-                                        text = "Cashfree (Primary)",
-                                        color = if (isCf) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp
-                                    )
-                                }
-
-                                val isRzp = selectedGateway == "Razorpay"
-                                Button(
-                                    onClick = { selectedGateway = "Razorpay" },
-                                    colors = ButtonDefaults.buttonColors(
-                                        containerColor = if (isRzp) MaterialTheme.colorScheme.primary else MaterialTheme.colorScheme.surfaceVariant
-                                    ),
-                                    shape = RoundedCornerShape(12.dp),
-                                    modifier = Modifier.weight(1f)
-                                ) {
-                                    Text(
-                                        text = "Razorpay",
-                                        color = if (isRzp) Color.White else MaterialTheme.colorScheme.onSurfaceVariant,
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 12.sp
-                                    )
-                                }
-                            }
-                        }
-                    }
-
                     Text(
                         text = "Select Credit Package",
                         fontSize = 18.sp,
@@ -163,7 +105,7 @@ fun WalletScreen(
                     plans.forEach { plan ->
                         PlanPurchaseCard(
                             plan = plan,
-                            onPurchase = { viewModel.purchasePlan(context, plan, selectedGateway, isSandboxMode) }
+                            onPurchase = { viewModel.purchasePlan(context, plan, isSandboxMode) }
                         )
                     }
 

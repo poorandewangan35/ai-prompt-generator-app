@@ -8,10 +8,6 @@ export default function PricingView() {
   const [pricePremium, setPricePremium] = useState(499);
   const [razorpayKeySandbox, setRazorpayKeySandbox] = useState("");
   const [razorpayKeyProduction, setRazorpayKeyProduction] = useState("");
-  const [cashfreeAppIdSandbox, setCashfreeAppIdSandbox] = useState("");
-  const [cashfreeSecretKeySandbox, setCashfreeSecretKeySandbox] = useState("");
-  const [cashfreeAppIdProduction, setCashfreeAppIdProduction] = useState("");
-  const [cashfreeSecretKeyProduction, setCashfreeSecretKeyProduction] = useState("");
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
@@ -28,10 +24,6 @@ export default function PricingView() {
           setPricePremium(data.pricePlanPremium ?? 499);
           setRazorpayKeySandbox(data.razorpayKeyIdSandbox ?? "");
           setRazorpayKeyProduction(data.razorpayKeyIdProduction ?? "");
-          setCashfreeAppIdSandbox(data.cashfreeAppIdSandbox ?? "");
-          setCashfreeSecretKeySandbox(data.cashfreeSecretKeySandbox ?? "");
-          setCashfreeAppIdProduction(data.cashfreeAppIdProduction ?? "");
-          setCashfreeSecretKeyProduction(data.cashfreeSecretKeyProduction ?? "");
         }
       } catch (err) {
         console.error("Failed to load pricing and payment config", err);
@@ -60,11 +52,7 @@ export default function PricingView() {
         pricePlanPopular: Number(pricePopular),
         pricePlanPremium: Number(pricePremium),
         razorpayKeyIdSandbox: razorpayKeySandbox,
-        razorpayKeyIdProduction: razorpayKeyProduction,
-        cashfreeAppIdSandbox: cashfreeAppIdSandbox,
-        cashfreeSecretKeySandbox: cashfreeSecretKeySandbox,
-        cashfreeAppIdProduction: cashfreeAppIdProduction,
-        cashfreeSecretKeyProduction: cashfreeSecretKeyProduction
+        razorpayKeyIdProduction: razorpayKeyProduction
       });
 
       setSuccess(true);
@@ -161,53 +149,6 @@ export default function PricingView() {
           </div>
         </div>
 
-        <div className="glass-card" style={{ marginTop: "24px" }}>
-          <h2 className="card-title">Cashfree Gateway Configurations</h2>
-          
-          <div className="form-group">
-            <label>Cashfree App ID (Sandbox / Test Mode)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={cashfreeAppIdSandbox}
-              onChange={(e) => setCashfreeAppIdSandbox(e.target.value)}
-              placeholder="cf_test_xxxxxxxxxxxxxx"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Cashfree Secret Key (Sandbox / Test Mode)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={cashfreeSecretKeySandbox}
-              onChange={(e) => setCashfreeSecretKeySandbox(e.target.value)}
-              placeholder="cf_secret_xxxxxxxxxxxxxx"
-            />
-          </div>
-
-          <div className="form-group" style={{ marginTop: "16px" }}>
-            <label>Cashfree App ID (Production / Live Mode)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={cashfreeAppIdProduction}
-              onChange={(e) => setCashfreeAppIdProduction(e.target.value)}
-              placeholder="cf_live_xxxxxxxxxxxxxx"
-            />
-          </div>
-
-          <div className="form-group">
-            <label>Cashfree Secret Key (Production / Live Mode)</label>
-            <input
-              type="text"
-              className="form-control"
-              value={cashfreeSecretKeyProduction}
-              onChange={(e) => setCashfreeSecretKeyProduction(e.target.value)}
-              placeholder="cf_secret_xxxxxxxxxxxxxx"
-            />
-          </div>
-        </div>
 
         <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
           <button type="submit" className="btn-primary" disabled={saving}>

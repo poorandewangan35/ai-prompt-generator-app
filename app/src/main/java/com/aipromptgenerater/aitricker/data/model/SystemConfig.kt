@@ -10,10 +10,6 @@ data class SystemConfig(
     @get:PropertyName("pricePlanPremium") @set:PropertyName("pricePlanPremium") var pricePlanPremium: Int = 499,
     @get:PropertyName("razorpayKeyIdSandbox") @set:PropertyName("razorpayKeyIdSandbox") var razorpayKeyIdSandbox: String = "rzp_test_your_sandbox_key",
     @get:PropertyName("razorpayKeyIdProduction") @set:PropertyName("razorpayKeyIdProduction") var razorpayKeyIdProduction: String = "rzp_live_your_production_key",
-    @get:PropertyName("cashfreeAppIdSandbox") @set:PropertyName("cashfreeAppIdSandbox") var cashfreeAppIdSandbox: String = "cf_test_your_app_id",
-    @get:PropertyName("cashfreeSecretKeySandbox") @set:PropertyName("cashfreeSecretKeySandbox") var cashfreeSecretKeySandbox: String = "cf_test_your_secret_key",
-    @get:PropertyName("cashfreeAppIdProduction") @set:PropertyName("cashfreeAppIdProduction") var cashfreeAppIdProduction: String = "cf_live_your_app_id",
-    @get:PropertyName("cashfreeSecretKeyProduction") @set:PropertyName("cashfreeSecretKeyProduction") var cashfreeSecretKeyProduction: String = "cf_live_your_secret_key",
     @get:PropertyName("openRouterApiKey") @set:PropertyName("openRouterApiKey") var openRouterApiKey: String = "",
     @get:PropertyName("openRouterModel") @set:PropertyName("openRouterModel") var openRouterModel: String = "google/gemini-2.5-flash-lite:free"
 )
