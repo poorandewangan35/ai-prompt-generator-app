@@ -741,7 +741,10 @@ fun GeneratorScreen(
                                     verticalAlignment = Alignment.CenterVertically,
                                     horizontalArrangement = Arrangement.SpaceBetween
                                 ) {
-                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                    Row(
+                                        verticalAlignment = Alignment.CenterVertically,
+                                        modifier = Modifier.weight(1f)
+                                    ) {
                                         Icon(
                                             imageVector = Icons.Default.Info,
                                             contentDescription = null,
@@ -755,10 +758,12 @@ fun GeneratorScreen(
                                             color = MaterialTheme.colorScheme.secondary
                                         )
                                     }
+                                    Spacer(modifier = Modifier.width(8.dp))
                                     Icon(
                                         imageVector = if (isAdvancedSettingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
                                         contentDescription = "Toggle Advanced",
-                                        tint = MaterialTheme.colorScheme.secondary
+                                        tint = MaterialTheme.colorScheme.secondary,
+                                        modifier = Modifier.size(20.dp)
                                     )
                                 }
                             }
