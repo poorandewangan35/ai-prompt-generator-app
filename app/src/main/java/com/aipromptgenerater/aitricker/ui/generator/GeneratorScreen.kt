@@ -175,6 +175,33 @@ fun HelpTextDropdown(
 }
 
 @Composable
+fun ToggleChecklistRow(
+    label: String,
+    checked: Boolean,
+    onCheckedChange: (Boolean) -> Unit
+) {
+    Row(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onCheckedChange(!checked) }
+            .padding(vertical = 4.dp),
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Checkbox(
+            checked = checked,
+            onCheckedChange = onCheckedChange,
+            colors = CheckboxDefaults.colors(checkedColor = MaterialTheme.colorScheme.primary)
+        )
+        Spacer(modifier = Modifier.width(8.dp))
+        Text(
+            text = label,
+            fontSize = 14.sp,
+            color = MaterialTheme.colorScheme.onSurface
+        )
+    }
+}
+
+@Composable
 fun ThemeSelector(
     selectedTheme: String,
     onThemeSelected: (String) -> Unit
@@ -314,6 +341,16 @@ fun GeneratorScreen(
 
     var preferredTechStack by remember { mutableStateOf("") }
 
+    // Advanced optional settings
+    var targetPlatform by remember { mutableStateOf("Not Specified") }
+    var databasePreference by remember { mutableStateOf("Not Specified") }
+    var targetAudience by remember { mutableStateOf("Not Specified") }
+    var hasMaps by remember { mutableStateOf(false) }
+    var hasCamera by remember { mutableStateOf(false) }
+    var hasNotifications by remember { mutableStateOf(false) }
+    var hasAnalytics by remember { mutableStateOf(false) }
+    var isAdvancedSettingsExpanded by remember { mutableStateOf(false) }
+
     var projectIdea by remember { mutableStateOf("") }
 
     // Preview state
@@ -330,16 +367,37 @@ fun GeneratorScreen(
             projectName
         }
     }
-    val finalTechStack = remember(uiTheme, paymentGateway, aiIntegration, preferredTechStack) {
-        val base = "UI Theme: $uiTheme | Payment Gateway: $paymentGateway | AI Integration: $aiIntegration"
-        if (preferredTechStack.trim().isNotEmpty()) {
-            "$base | Preferred Tech Stack: $preferredTechStack"
-        } else {
-            base
-        }
+    val finalTechStack = remember(uiTheme, paymentGateway, aiIntegration, preferredTechStack, databasePreference, targetPlatform) {
+        val base = StringBuilder().apply {
+            append("UI Theme: $uiTheme | Payment Gateway: $paymentGateway | AI Integration: $aiIntegration")
+            if (preferredTechStack.trim().isNotEmpty()) {
+                append(" | Preferred Tech Stack: $preferredTechStack")
+            }
+            if (databasePreference != "Not Specified") {
+                append(" | Database Preference: $databasePreference")
+            }
+            if (generatorType == "App" && targetPlatform != "Not Specified") {
+                append(" | Target Platform: $targetPlatform")
+            }
+        }.toString()
+        base
     }
-    val finalFeatures = remember(panelType, authSystem, monetizationModel) {
-        "Panel Type: $panelType | Login System: $authSystem | Monetization Model: $monetizationModel"
+    val finalFeatures = remember(panelType, authSystem, monetizationModel, targetAudience, hasMaps, hasCamera, hasNotifications, hasAnalytics) {
+        val base = StringBuilder().apply {
+            append("Panel Type: $panelType | Login System: $authSystem | Monetization Model: $monetizationModel")
+            if (targetAudience != "Not Specified") {
+                append(" | Target Audience: $targetAudience")
+            }
+            val integrations = mutableListOf<String>()
+            if (hasMaps) integrations.add("Maps & Geolocation")
+            if (hasCamera) integrations.add("Camera & Media Uploads")
+            if (hasNotifications) integrations.add("Push Notifications")
+            if (hasAnalytics) integrations.add("Analytics & Crash Reports")
+            if (integrations.isNotEmpty()) {
+                append(" | Integrations: ${integrations.joinToString(", ")}")
+            }
+        }.toString()
+        base
     }
     val finalIdea = remember(projectIdea, extraFeatures) {
         if (extraFeatures.trim().isNotEmpty()) {
@@ -406,6 +464,14 @@ fun GeneratorScreen(
                             monetizationModel = "Product Based (like Amazon)"
                             isMonetizationHelpExpanded = false
                             preferredTechStack = ""
+                            targetPlatform = "Not Specified"
+                            databasePreference = "Not Specified"
+                            targetAudience = "Not Specified"
+                            hasMaps = false
+                            hasCamera = false
+                            hasNotifications = false
+                            hasAnalytics = false
+                            isAdvancedSettingsExpanded = false
                             aiIntegration = "No AI Integration"
                             projectIdea = ""
                             extraFeatures = ""
@@ -659,6 +725,153 @@ fun GeneratorScreen(
                                 )
                             }
 
+                            // Advanced Settings Header
+                            Card(
+                                modifier = Modifier.fillMaxWidth(),
+                                shape = RoundedCornerShape(16.dp),
+                                colors = CardDefaults.cardColors(
+                                    containerColor = MaterialTheme.colorScheme.secondaryContainer.copy(alpha = 0.4f)
+                                )
+                            ) {
+                                Row(
+                                    modifier = Modifier
+                                        .fillMaxWidth()
+                                        .clickable { isAdvancedSettingsExpanded = !isAdvancedSettingsExpanded }
+                                        .padding(16.dp),
+                                    verticalAlignment = Alignment.CenterVertically,
+                                    horizontalArrangement = Arrangement.SpaceBetween
+                                ) {
+                                    Row(verticalAlignment = Alignment.CenterVertically) {
+                                        Icon(
+                                            imageVector = Icons.Default.Info,
+                                            contentDescription = null,
+                                            tint = MaterialTheme.colorScheme.secondary
+                                        )
+                                        Spacer(modifier = Modifier.width(8.dp))
+                                        Text(
+                                            text = "Advanced Platform & Infrastructure (Optional)",
+                                            fontSize = 13.sp,
+                                            fontWeight = FontWeight.Bold,
+                                            color = MaterialTheme.colorScheme.secondary
+                                        )
+                                    }
+                                    Icon(
+                                        imageVector = if (isAdvancedSettingsExpanded) Icons.Default.KeyboardArrowUp else Icons.Default.KeyboardArrowDown,
+                                        contentDescription = "Toggle Advanced",
+                                        tint = MaterialTheme.colorScheme.secondary
+                                    )
+                                }
+                            }
+
+                            AnimatedVisibility(
+                                visible = isAdvancedSettingsExpanded,
+                                enter = expandVertically() + fadeIn(),
+                                exit = shrinkVertically() + fadeOut()
+                            ) {
+                                Column(
+                                    modifier = Modifier.fillMaxWidth(),
+                                    verticalArrangement = Arrangement.spacedBy(16.dp)
+                                ) {
+                                    // 1. Target Platforms (Mobile App Specific)
+                                    if (generatorType == "App") {
+                                        OptionGroupCard(
+                                            icon = Icons.Default.Build,
+                                            title = "Target Platform (Optional)"
+                                        ) {
+                                            Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                                SegmentedOptionRow(
+                                                    options = listOf("Not Specified", "Android Native (Kotlin)"),
+                                                    selectedOption = targetPlatform,
+                                                    onOptionSelected = { targetPlatform = it }
+                                                )
+                                                SegmentedOptionRow(
+                                                    options = listOf("iOS Native (Swift)", "Flutter"),
+                                                    selectedOption = targetPlatform,
+                                                    onOptionSelected = { targetPlatform = it }
+                                                )
+                                                SegmentedOptionRow(
+                                                    options = listOf("React Native"),
+                                                    selectedOption = targetPlatform,
+                                                    onOptionSelected = { targetPlatform = it }
+                                                )
+                                            }
+                                        }
+                                    }
+
+                                    // 2. Database & Hosting Preference
+                                    OptionGroupCard(
+                                        icon = Icons.Default.Info,
+                                        title = "Database & Hosting Preference (Optional)"
+                                    ) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            SegmentedOptionRow(
+                                                options = listOf("Not Specified", "Firebase Firestore"),
+                                                selectedOption = databasePreference,
+                                                onOptionSelected = { databasePreference = it }
+                                            )
+                                            SegmentedOptionRow(
+                                                options = listOf("Supabase (Postgres)", "Custom API (SQL)"),
+                                                selectedOption = databasePreference,
+                                                onOptionSelected = { databasePreference = it }
+                                            )
+                                            SegmentedOptionRow(
+                                                options = listOf("Local Only"),
+                                                selectedOption = databasePreference,
+                                                onOptionSelected = { databasePreference = it }
+                                            )
+                                        }
+                                    }
+
+                                    // 3. Target Audience / User Type
+                                    OptionGroupCard(
+                                        icon = Icons.Default.Info,
+                                        title = "Target Audience (Optional)"
+                                    ) {
+                                        Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                            SegmentedOptionRow(
+                                                options = listOf("Not Specified", "B2C (Public Users)"),
+                                                selectedOption = targetAudience,
+                                                onOptionSelected = { targetAudience = it }
+                                            )
+                                            SegmentedOptionRow(
+                                                options = listOf("B2B (Enterprise)", "Mixed Audience"),
+                                                selectedOption = targetAudience,
+                                                onOptionSelected = { targetAudience = it }
+                                            )
+                                        }
+                                    }
+
+                                    // 4. Advanced Integrations (Multi-Select Checklist)
+                                    OptionGroupCard(
+                                        icon = Icons.Default.Add,
+                                        title = "Advanced Integrations (Optional)"
+                                    ) {
+                                        Column {
+                                            ToggleChecklistRow(
+                                                label = "Maps & Geolocation",
+                                                checked = hasMaps,
+                                                onCheckedChange = { hasMaps = it }
+                                            )
+                                            ToggleChecklistRow(
+                                                label = "Camera & Media Uploads",
+                                                checked = hasCamera,
+                                                onCheckedChange = { hasCamera = it }
+                                            )
+                                            ToggleChecklistRow(
+                                                label = "Push Notifications",
+                                                checked = hasNotifications,
+                                                onCheckedChange = { hasNotifications = it }
+                                            )
+                                            ToggleChecklistRow(
+                                                label = "Analytics & Crash Reports",
+                                                checked = hasAnalytics,
+                                                onCheckedChange = { hasAnalytics = it }
+                                            )
+                                        }
+                                    }
+                                }
+                            }
+
                             // 7. Describe Card
                             OptionGroupCard(
                                 icon = Icons.Default.Info,
@@ -745,7 +958,7 @@ fun GeneratorScreen(
                                     )
                                     HorizontalDivider(color = MaterialTheme.colorScheme.primary.copy(alpha = 0.1f))
 
-                                    val details = remember(projectName, packageOrDomain, panelType, authSystem, uiTheme, paymentGateway, monetizationModel, aiIntegration, preferredTechStack, projectIdea) {
+                                    val details = remember(projectName, packageOrDomain, panelType, authSystem, uiTheme, paymentGateway, monetizationModel, aiIntegration, preferredTechStack, targetPlatform, databasePreference, targetAudience, hasMaps, hasCamera, hasNotifications, hasAnalytics, projectIdea) {
                                         val list = mutableListOf(
                                             "Project Type" to generatorType,
                                             "Name" to projectName.ifEmpty { "Not specified" },
@@ -759,6 +972,23 @@ fun GeneratorScreen(
                                         )
                                         if (preferredTechStack.trim().isNotEmpty()) {
                                             list.add("Preferred Tech Stack" to preferredTechStack)
+                                        }
+                                        if (generatorType == "App" && targetPlatform != "Not Specified") {
+                                            list.add("Target Platform" to targetPlatform)
+                                        }
+                                        if (databasePreference != "Not Specified") {
+                                            list.add("Database & Hosting" to databasePreference)
+                                        }
+                                        if (targetAudience != "Not Specified") {
+                                            list.add("Target Audience" to targetAudience)
+                                        }
+                                        val integrations = mutableListOf<String>()
+                                        if (hasMaps) integrations.add("Maps")
+                                        if (hasCamera) integrations.add("Camera")
+                                        if (hasNotifications) integrations.add("Notifications")
+                                        if (hasAnalytics) integrations.add("Analytics")
+                                        if (integrations.isNotEmpty()) {
+                                            list.add("Integrations" to integrations.joinToString(", "))
                                         }
                                         list.add("Description" to projectIdea)
                                         list
