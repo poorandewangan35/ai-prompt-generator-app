@@ -28,6 +28,7 @@ import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material.icons.filled.Star
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Visibility
+import androidx.compose.material.icons.filled.AttachMoney
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -305,6 +306,9 @@ fun GeneratorScreen(
     var paymentGateway by remember { mutableStateOf("Razorpay") }
     var isPaymentHelpExpanded by remember { mutableStateOf(false) }
 
+    var monetizationModel by remember { mutableStateOf("Product Based (like Amazon)") }
+    var isMonetizationHelpExpanded by remember { mutableStateOf(false) }
+
     var aiIntegration by remember { mutableStateOf("No AI Integration") }
 
     var projectIdea by remember { mutableStateOf("") }
@@ -326,8 +330,8 @@ fun GeneratorScreen(
     val finalTechStack = remember(uiTheme, paymentGateway, aiIntegration) {
         "UI Theme: $uiTheme | Payment Gateway: $paymentGateway | AI Integration: $aiIntegration"
     }
-    val finalFeatures = remember(panelType, authSystem) {
-        "Panel Type: $panelType | Login System: $authSystem"
+    val finalFeatures = remember(panelType, authSystem, monetizationModel) {
+        "Panel Type: $panelType | Login System: $authSystem | Monetization Model: $monetizationModel"
     }
     val finalIdea = remember(projectIdea, extraFeatures) {
         if (extraFeatures.trim().isNotEmpty()) {
@@ -391,6 +395,8 @@ fun GeneratorScreen(
                             authSystem = "Google Login"
                             uiTheme = "Dark AI Style"
                             paymentGateway = "Razorpay"
+                            monetizationModel = "Product Based (like Amazon)"
+                            isMonetizationHelpExpanded = false
                             aiIntegration = "No AI Integration"
                             projectIdea = ""
                             extraFeatures = ""
@@ -539,6 +545,68 @@ fun GeneratorScreen(
                                 )
                             }
 
+                            // 5.5 Monetization Model Card
+                            OptionGroupCard(
+                                icon = Icons.Default.AttachMoney,
+                                title = "Monetization Model"
+                            ) {
+                                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                                    SegmentedOptionRow(
+                                        options = listOf("Credit Pack (Basic / Pro / Premium)", "Product Based (like Amazon)"),
+                                        selectedOption = monetizationModel,
+                                        onOptionSelected = { monetizationModel = it }
+                                    )
+                                    Row(
+                                        modifier = Modifier.fillMaxWidth(),
+                                        horizontalArrangement = Arrangement.spacedBy(12.dp)
+                                    ) {
+                                        val isSelected = monetizationModel == "Service Based (Appointments / Booking)"
+                                        Button(
+                                            onClick = { monetizationModel = "Service Based (Appointments / Booking)" },
+                                            colors = ButtonDefaults.buttonColors(
+                                                containerColor = if (isSelected) Color(0xFFB2DFDB) else Color.White
+                                            ),
+                                            shape = RoundedCornerShape(12.dp),
+                                            border = BorderStroke(1.dp, if (isSelected) Color(0xFF004D40) else Color(0xFFCCCCCC)),
+                                            modifier = Modifier.weight(1f),
+                                            contentPadding = PaddingValues(horizontal = 8.dp, vertical = 8.dp)
+                                        ) {
+                                            Row(
+                                                verticalAlignment = Alignment.CenterVertically,
+                                                horizontalArrangement = Arrangement.Center
+                                            ) {
+                                                if (isSelected) {
+                                                    Icon(
+                                                        imageVector = Icons.Default.Check,
+                                                        contentDescription = "Selected",
+                                                        tint = Color(0xFF004D40),
+                                                        modifier = Modifier.size(16.dp)
+                                                    )
+                                                    Spacer(modifier = Modifier.width(4.dp))
+                                                }
+                                                Text(
+                                                    text = "Service Based (Appointments / Booking)",
+                                                    color = if (isSelected) Color(0xFF004D40) else Color.Gray,
+                                                    fontWeight = FontWeight.Bold,
+                                                    fontSize = 12.sp,
+                                                    textAlign = TextAlign.Center
+                                                )
+                                            }
+                                        }
+                                        Spacer(modifier = Modifier.weight(1f))
+                                    }
+                                }
+                                HelpTextDropdown(
+                                    isExpanded = isMonetizationHelpExpanded,
+                                    onToggle = { isMonetizationHelpExpanded = !isMonetizationHelpExpanded },
+                                    content = when (monetizationModel) {
+                                        "Credit Pack (Basic / Pro / Premium)" -> "Allows users to buy credit packages to consume services inside the app. Ideal for token-based, AI usage, or query-based products."
+                                        "Product Based (like Amazon)" -> "Includes a shopping cart, catalog, checkouts, and order management to sell physical or digital inventory."
+                                        else -> "Enables appointment scheduling, calendar integrations, and booking workflows to sell time slots or professional services."
+                                    }
+                                )
+                            }
+
                             // 6. AI Integration Card
                             OptionGroupCard(
                                 icon = Icons.Default.Star,
@@ -652,6 +720,7 @@ fun GeneratorScreen(
                                         "Auth System" to authSystem,
                                         "UI Theme" to uiTheme,
                                         "Payment Gateway" to paymentGateway,
+                                        "Monetization Model" to monetizationModel,
                                         "AI Integration" to aiIntegration,
                                         "Description" to projectIdea
                                     )
