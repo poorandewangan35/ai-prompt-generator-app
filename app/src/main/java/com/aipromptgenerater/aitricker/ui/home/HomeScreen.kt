@@ -373,8 +373,12 @@ fun RecentPromptItem(
                         text = if (prompt.name.isNotEmpty()) prompt.name else "Unnamed project",
                         fontSize = 15.sp,
                         fontWeight = FontWeight.Bold,
-                        color = MaterialTheme.colorScheme.onSurface
+                        color = MaterialTheme.colorScheme.onSurface,
+                        maxLines = 1,
+                        overflow = TextOverflow.Ellipsis,
+                        modifier = Modifier.weight(1f)
                     )
+                    Spacer(modifier = Modifier.width(8.dp))
                     val dateText = DateUtils.getRelativeTimeSpanString(
                         prompt.createdAt,
                         System.currentTimeMillis(),
