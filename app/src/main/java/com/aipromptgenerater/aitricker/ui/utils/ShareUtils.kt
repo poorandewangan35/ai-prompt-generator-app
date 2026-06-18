@@ -31,6 +31,17 @@ fun copyToClipboard(context: Context, text: String, label: String = "AI Generate
 
 fun shareToWhatsApp(context: Context, text: String) {
     try {
+        // Copy to clipboard first so the user can easily paste if WhatsApp truncates it
+        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
+        val clip = ClipData.newPlainText("AI Generated Prompt", text)
+        clipboard.setPrimaryClip(clip)
+        
+        Toast.makeText(
+            context,
+            "Prompt copied! If text is cut off in WhatsApp, just paste it.",
+            Toast.LENGTH_LONG
+        ).show()
+
         val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
             putExtra(Intent.EXTRA_TEXT, text)
