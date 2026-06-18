@@ -30,32 +30,45 @@ fun copyToClipboard(context: Context, text: String, label: String = "AI Generate
 }
 
 fun shareToWhatsApp(context: Context, text: String) {
+    val cacheDir = context.cacheDir
+    val tempFile = java.io.File(cacheDir, "AI_Generated_Prompt.txt")
     try {
-        // Copy to clipboard first so the user can easily paste if WhatsApp truncates it
-        val clipboard = context.getSystemService(Context.CLIPBOARD_SERVICE) as ClipboardManager
-        val clip = ClipData.newPlainText("AI Generated Prompt", text)
-        clipboard.setPrimaryClip(clip)
-        
-        Toast.makeText(
+        tempFile.writeText(text)
+        val fileUri = androidx.core.content.FileProvider.getUriForFile(
             context,
-            "Prompt copied! If text is cut off in WhatsApp, just paste it.",
-            Toast.LENGTH_LONG
-        ).show()
-
+            "${context.packageName}.fileprovider",
+            tempFile
+        )
+        
         val whatsappIntent = Intent(Intent.ACTION_SEND).apply {
             type = "text/plain"
-            putExtra(Intent.EXTRA_TEXT, text)
+            putExtra(Intent.EXTRA_STREAM, fileUri)
+            addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
             setPackage("com.whatsapp")
         }
         context.startActivity(whatsappIntent)
     } catch (e: Exception) {
-        Log.e("SHARE_WHATSAPP", "Failed to share directly via WhatsApp, attempting fallback share chooser", e)
+        Log.e("SHARE_WHATSAPP", "Failed to share file directly via WhatsApp, attempting fallback share chooser", e)
         try {
-            val shareIntent = Intent(Intent.ACTION_SEND).apply {
-                type = "text/plain"
-                putExtra(Intent.EXTRA_TEXT, text)
+            if (tempFile.exists()) {
+                val fileUri = androidx.core.content.FileProvider.getUriForFile(
+                    context,
+                    "${context.packageName}.fileprovider",
+                    tempFile
+                )
+                val shareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_STREAM, fileUri)
+                    addFlags(Intent.FLAG_GRANT_READ_URI_PERMISSION)
+                }
+                context.startActivity(Intent.createChooser(shareIntent, "Share Prompt File"))
+            } else {
+                val textShareIntent = Intent(Intent.ACTION_SEND).apply {
+                    type = "text/plain"
+                    putExtra(Intent.EXTRA_TEXT, text)
+                }
+                context.startActivity(Intent.createChooser(textShareIntent, "Share Prompt Text"))
             }
-            context.startActivity(Intent.createChooser(shareIntent, "Share Prompt"))
         } catch (innerEx: Exception) {
             Log.e("SHARE_WHATSAPP", "Fallback share chooser failed", innerEx)
             Toast.makeText(context, "Sharing failed: ${innerEx.message}", Toast.LENGTH_SHORT).show()
