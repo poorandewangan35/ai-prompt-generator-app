@@ -398,7 +398,7 @@ fun GeneratorScreen(
     var paymentGateway by remember { mutableStateOf("Razorpay") }
     var isPaymentHelpExpanded by remember { mutableStateOf(false) }
 
-    var monetizationModel by remember { mutableStateOf("Let AI Choose (Skip)") }
+    var monetizationModel by remember { mutableStateOf("") }
     var isMonetizationHelpExpanded by remember { mutableStateOf(false) }
 
     var aiIntegration by remember { mutableStateOf("Let AI Choose (Skip)") }
@@ -407,8 +407,8 @@ fun GeneratorScreen(
 
     // Advanced optional settings
     var targetPlatform by remember { mutableStateOf("Not Specified") }
-    var databasePreference by remember { mutableStateOf("Not Specified") }
-    var targetAudience by remember { mutableStateOf("Not Specified") }
+    var databasePreference by remember { mutableStateOf("") }
+    var targetAudience by remember { mutableStateOf("") }
     var hasMaps by remember { mutableStateOf(false) }
     var hasCamera by remember { mutableStateOf(false) }
     var hasNotifications by remember { mutableStateOf(false) }
@@ -437,7 +437,7 @@ fun GeneratorScreen(
             if (preferredTechStack.trim().isNotEmpty()) {
                 append(" | Preferred Tech Stack: $preferredTechStack")
             }
-            if (databasePreference != "Not Specified") {
+            if (databasePreference.isNotEmpty() && databasePreference != "Not Specified") {
                 append(" | Database Preference: $databasePreference")
             }
             if (generatorType == "App" && targetPlatform != "Not Specified") {
@@ -448,8 +448,11 @@ fun GeneratorScreen(
     }
     val finalFeatures = remember(panelType, authSystem, monetizationModel, targetAudience, hasMaps, hasCamera, hasNotifications, hasAnalytics) {
         val base = StringBuilder().apply {
-            append("Panel Type: $panelType | Login System: $authSystem | Monetization Model: $monetizationModel")
-            if (targetAudience != "Not Specified") {
+            append("Panel Type: $panelType | Login System: $authSystem")
+            if (monetizationModel.isNotEmpty()) {
+                append(" | Monetization Model: $monetizationModel")
+            }
+            if (targetAudience.isNotEmpty() && targetAudience != "Not Specified") {
                 append(" | Target Audience: $targetAudience")
             }
             val integrations = mutableListOf<String>()
@@ -522,12 +525,12 @@ fun GeneratorScreen(
                             authSystem = "Google Login"
                             uiTheme = "Let AI Choose (Skip)"
                             paymentGateway = "Razorpay"
-                            monetizationModel = "Let AI Choose (Skip)"
+                            monetizationModel = ""
                             isMonetizationHelpExpanded = false
                             preferredTechStack = ""
                             targetPlatform = "Not Specified"
-                            databasePreference = "Not Specified"
-                            targetAudience = "Not Specified"
+                            databasePreference = ""
+                            targetAudience = ""
                             hasMaps = false
                             hasCamera = false
                             hasNotifications = false
@@ -697,12 +700,16 @@ fun GeneratorScreen(
                                     SegmentedOptionRow(
                                         options = listOf("Let AI Choose (Skip)", "Credit Pack (Basic / Pro / Premium)"),
                                         selectedOption = monetizationModel,
-                                        onOptionSelected = { monetizationModel = it }
+                                        onOptionSelected = { selected ->
+                                            monetizationModel = if (monetizationModel == selected) "" else selected
+                                        }
                                     )
                                     SegmentedOptionRow(
                                         options = listOf("Product Based (like Amazon)", "Service Based (Appointments / Booking)"),
                                         selectedOption = monetizationModel,
-                                        onOptionSelected = { monetizationModel = it }
+                                        onOptionSelected = { selected ->
+                                            monetizationModel = if (monetizationModel == selected) "" else selected
+                                        }
                                     )
                                 }
                                 HelpTextDropdown(
@@ -885,17 +892,23 @@ fun GeneratorScreen(
                                             SegmentedOptionRow(
                                                 options = listOf("Not Specified", "Firebase Firestore"),
                                                 selectedOption = databasePreference,
-                                                onOptionSelected = { databasePreference = it }
+                                                onOptionSelected = { selected ->
+                                                    databasePreference = if (databasePreference == selected) "" else selected
+                                                }
                                             )
                                             SegmentedOptionRow(
                                                 options = listOf("Supabase (Postgres)", "Custom API (SQL)"),
                                                 selectedOption = databasePreference,
-                                                onOptionSelected = { databasePreference = it }
+                                                onOptionSelected = { selected ->
+                                                    databasePreference = if (databasePreference == selected) "" else selected
+                                                }
                                             )
                                             SegmentedOptionRow(
                                                 options = listOf("Local Only"),
                                                 selectedOption = databasePreference,
-                                                onOptionSelected = { databasePreference = it }
+                                                onOptionSelected = { selected ->
+                                                    databasePreference = if (databasePreference == selected) "" else selected
+                                                }
                                             )
                                         }
                                     }
@@ -909,12 +922,16 @@ fun GeneratorScreen(
                                             SegmentedOptionRow(
                                                 options = listOf("Not Specified", "B2C (Public Users)"),
                                                 selectedOption = targetAudience,
-                                                onOptionSelected = { targetAudience = it }
+                                                onOptionSelected = { selected ->
+                                                    targetAudience = if (targetAudience == selected) "" else selected
+                                                }
                                             )
                                             SegmentedOptionRow(
                                                 options = listOf("B2B (Enterprise)", "Mixed Audience"),
                                                 selectedOption = targetAudience,
-                                                onOptionSelected = { targetAudience = it }
+                                                onOptionSelected = { selected ->
+                                                    targetAudience = if (targetAudience == selected) "" else selected
+                                                }
                                             )
                                         }
                                     }
@@ -1045,7 +1062,7 @@ fun GeneratorScreen(
                                             "Auth System" to authSystem,
                                             "UI Theme" to uiTheme,
                                             "Payment Gateway" to paymentGateway,
-                                            "Monetization Model" to monetizationModel,
+                                            "Monetization Model" to monetizationModel.ifEmpty { "Not specified" },
                                             "AI Integration" to aiIntegration
                                         )
                                         if (preferredTechStack.trim().isNotEmpty()) {
@@ -1054,10 +1071,10 @@ fun GeneratorScreen(
                                         if (generatorType == "App" && targetPlatform != "Not Specified") {
                                             list.add("Target Platform" to targetPlatform)
                                         }
-                                        if (databasePreference != "Not Specified") {
+                                        if (databasePreference.isNotEmpty() && databasePreference != "Not Specified") {
                                             list.add("Database & Hosting" to databasePreference)
                                         }
-                                        if (targetAudience != "Not Specified") {
+                                        if (targetAudience.isNotEmpty() && targetAudience != "Not Specified") {
                                             list.add("Target Audience" to targetAudience)
                                         }
                                         val integrations = mutableListOf<String>()
