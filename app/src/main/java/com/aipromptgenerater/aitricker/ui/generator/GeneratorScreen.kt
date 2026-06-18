@@ -406,7 +406,7 @@ fun GeneratorScreen(
     var preferredTechStack by remember { mutableStateOf("") }
 
     // Advanced optional settings
-    var targetPlatform by remember { mutableStateOf("Not Specified") }
+    var targetPlatform by remember { mutableStateOf("") }
     var databasePreference by remember { mutableStateOf("") }
     var targetAudience by remember { mutableStateOf("") }
     var hasMaps by remember { mutableStateOf(false) }
@@ -440,7 +440,7 @@ fun GeneratorScreen(
             if (databasePreference.isNotEmpty() && databasePreference != "Not Specified") {
                 append(" | Database Preference: $databasePreference")
             }
-            if (generatorType == "App" && targetPlatform != "Not Specified") {
+            if (generatorType == "App" && targetPlatform.isNotEmpty() && targetPlatform != "Not Specified") {
                 append(" | Target Platform: $targetPlatform")
             }
         }.toString()
@@ -528,7 +528,7 @@ fun GeneratorScreen(
                             monetizationModel = ""
                             isMonetizationHelpExpanded = false
                             preferredTechStack = ""
-                            targetPlatform = "Not Specified"
+                            targetPlatform = ""
                             databasePreference = ""
                             targetAudience = ""
                             hasMaps = false
@@ -867,17 +867,23 @@ fun GeneratorScreen(
                                                 SegmentedOptionRow(
                                                     options = listOf("Not Specified", "Android Native (Kotlin)"),
                                                     selectedOption = targetPlatform,
-                                                    onOptionSelected = { targetPlatform = it }
+                                                    onOptionSelected = { selected ->
+                                                        targetPlatform = if (targetPlatform == selected) "" else selected
+                                                    }
                                                 )
                                                 SegmentedOptionRow(
                                                     options = listOf("iOS Native (Swift)", "Flutter"),
                                                     selectedOption = targetPlatform,
-                                                    onOptionSelected = { targetPlatform = it }
+                                                    onOptionSelected = { selected ->
+                                                        targetPlatform = if (targetPlatform == selected) "" else selected
+                                                    }
                                                 )
                                                 SegmentedOptionRow(
                                                     options = listOf("React Native"),
                                                     selectedOption = targetPlatform,
-                                                    onOptionSelected = { targetPlatform = it }
+                                                    onOptionSelected = { selected ->
+                                                        targetPlatform = if (targetPlatform == selected) "" else selected
+                                                    }
                                                 )
                                             }
                                         }
@@ -1068,7 +1074,7 @@ fun GeneratorScreen(
                                         if (preferredTechStack.trim().isNotEmpty()) {
                                             list.add("Preferred Tech Stack" to preferredTechStack)
                                         }
-                                        if (generatorType == "App" && targetPlatform != "Not Specified") {
+                                        if (generatorType == "App" && targetPlatform.isNotEmpty() && targetPlatform != "Not Specified") {
                                             list.add("Target Platform" to targetPlatform)
                                         }
                                         if (databasePreference.isNotEmpty() && databasePreference != "Not Specified") {
