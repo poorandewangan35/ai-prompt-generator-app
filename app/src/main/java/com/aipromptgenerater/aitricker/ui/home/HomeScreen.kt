@@ -477,46 +477,40 @@ fun PromptDetailDialog(
             ) {
                 Row(
                     modifier = Modifier.fillMaxWidth(),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp)
+                    horizontalArrangement = Arrangement.SpaceEvenly,
+                    verticalAlignment = Alignment.CenterVertically
                 ) {
                     // Copy
-                    Button(
-                        onClick = { copyToClipboard(context, prompt.response) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(40.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 4.dp)
-                    ) {
-                        Text("Copy", fontSize = 12.sp)
+                    IconButton(onClick = { copyToClipboard(context, prompt.response) }) {
+                        Icon(
+                            imageVector = Icons.Default.ContentCopy,
+                            contentDescription = "Copy Prompt",
+                            tint = MaterialTheme.colorScheme.primary,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
 
                     // WhatsApp
-                    Button(
-                        onClick = { shareToWhatsApp(context, prompt.response) },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(40.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                        contentPadding = PaddingValues(horizontal = 4.dp)
-                    ) {
-                        Text("WhatsApp", color = Color.White, fontSize = 11.sp)
+                    IconButton(onClick = { shareToWhatsApp(context, prompt.response) }) {
+                        Icon(
+                            imageVector = Icons.Default.Share,
+                            contentDescription = "Share to WhatsApp",
+                            tint = Color(0xFF25D366),
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
 
                     // PDF
-                    OutlinedButton(
-                        onClick = {
-                            val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
-                            savePromptAsPdf(context, title, prompt.response)
-                        },
-                        modifier = Modifier
-                            .weight(1f)
-                            .height(40.dp),
-                        shape = RoundedCornerShape(10.dp),
-                        contentPadding = PaddingValues(horizontal = 4.dp)
-                    ) {
-                        Text("PDF", fontSize = 12.sp)
+                    IconButton(onClick = {
+                        val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
+                        savePromptAsPdf(context, title, prompt.response)
+                    }) {
+                        Icon(
+                            imageVector = Icons.Default.PictureAsPdf,
+                            contentDescription = "Download PDF",
+                            tint = MaterialTheme.colorScheme.secondary,
+                            modifier = Modifier.size(24.dp)
+                        )
                     }
                 }
 

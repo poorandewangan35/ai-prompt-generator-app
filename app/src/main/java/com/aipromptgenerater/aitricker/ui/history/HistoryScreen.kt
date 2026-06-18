@@ -18,6 +18,8 @@ import androidx.compose.material.icons.filled.Build
 import androidx.compose.material.icons.filled.PlayArrow
 import androidx.compose.material.icons.filled.Share
 import androidx.compose.material.icons.filled.Delete
+import androidx.compose.material.icons.filled.ContentCopy
+import androidx.compose.material.icons.filled.PictureAsPdf
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
 import androidx.compose.ui.Alignment
@@ -198,49 +200,41 @@ fun HistoryThreadItem(
             Spacer(modifier = Modifier.height(12.dp))
 
             Row(
-                modifier = Modifier
-                    .fillMaxWidth()
-                    .height(36.dp),
-                horizontalArrangement = Arrangement.spacedBy(8.dp)
+                modifier = Modifier.fillMaxWidth(),
+                horizontalArrangement = Arrangement.End,
+                verticalAlignment = Alignment.CenterVertically
             ) {
                 // Copy Prompt
-                Button(
-                    onClick = { copyToClipboard(context, prompt.response) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
-                ) {
-                    Text("Copy", fontSize = 12.sp)
+                IconButton(onClick = { copyToClipboard(context, prompt.response) }) {
+                    Icon(
+                        imageVector = Icons.Default.ContentCopy,
+                        contentDescription = "Copy Prompt",
+                        tint = MaterialTheme.colorScheme.primary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
 
                 // WhatsApp Share
-                Button(
-                    onClick = { shareToWhatsApp(context, prompt.response) },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(10.dp),
-                    colors = ButtonDefaults.buttonColors(containerColor = Color(0xFF25D366)),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
-                ) {
-                    Text("WhatsApp", color = Color.White, fontSize = 11.sp)
+                IconButton(onClick = { shareToWhatsApp(context, prompt.response) }) {
+                    Icon(
+                        imageVector = Icons.Default.Share,
+                        contentDescription = "Share to WhatsApp",
+                        tint = Color(0xFF25D366),
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
 
                 // Download PDF
-                OutlinedButton(
-                    onClick = {
-                        val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
-                        savePromptAsPdf(context, title, prompt.response)
-                    },
-                    modifier = Modifier
-                        .weight(1f)
-                        .fillMaxHeight(),
-                    shape = RoundedCornerShape(10.dp),
-                    contentPadding = PaddingValues(horizontal = 4.dp)
-                ) {
-                    Text("PDF", fontSize = 12.sp)
+                IconButton(onClick = {
+                    val title = if (prompt.type == "App") "App Prompt Architecture" else "Website Prompt Architecture"
+                    savePromptAsPdf(context, title, prompt.response)
+                }) {
+                    Icon(
+                        imageVector = Icons.Default.PictureAsPdf,
+                        contentDescription = "Download PDF",
+                        tint = MaterialTheme.colorScheme.secondary,
+                        modifier = Modifier.size(20.dp)
+                    )
                 }
             }
         }
