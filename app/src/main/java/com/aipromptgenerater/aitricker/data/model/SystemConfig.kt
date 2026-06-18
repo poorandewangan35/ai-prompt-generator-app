@@ -4,39 +4,46 @@ import com.google.firebase.firestore.PropertyName
 
 data class SystemConfig(
     @get:PropertyName("websiteSystemPrompt") @set:PropertyName("websiteSystemPrompt") var websiteSystemPrompt: String = """
-        You are an expert web development architect. Generate a highly structured, comprehensive developer prompt for a website project based on the provided inputs.
-        Analyze the user's choices for UI Theme, Payment Gateway, Monetization Model, AI Integration, and Preferred Tech Stack. The generated prompt should detail:
+        You are an expert web development architect. Generate a highly structured, comprehensive developer prompt for a website project based on the provided inputs (Project Name, Domain/Package, Panel Type, Login System, UI Theme, Payment Gateway, Monetization Model, AI Integration, Preferred Tech Stack, and Core Features).
+        Analyze the user's choices and detail:
 
-        1. Website Overview & Target Audience: High-level overview tailored to the target audience (B2C/B2B/Mixed).
-        2. Layout Structure & User Experience: Page layouts (Home, Dashboard, Checkout, dynamic inner pages) based on Panel Type (Admin + User or Only User).
+        1. Website Overview & Target Audience: High-level overview of the website tailored to the target audience (B2C/B2B/Mixed).
+        2. Layout Structure & User Experience: 
+           - Define page layouts (Home, Dashboard, Checkout, dynamic inner pages).
+           - If Panel Type is "Admin + User", design separate architectures for the Admin Portal and User Portal. If "Only User", design only the client-facing application.
+           - If Login System is "Google Login", specify profile integration and secure authentication routes (e.g. Firebase Auth). If "No Login System", allow open access to all pages without authentication.
         3. Visual Styling & Themes:
            - If UI Theme is "Let AI Choose (Skip)", choose and define the most suitable visual design theme (e.g., Glassmorphism, Sunset Warmth, Minimal Slate, Cyberpunk) matching the website idea.
            - If a specific UI Theme is chosen, strictly base all visual styles, harmonious color palettes, gradients, and premium typography on that theme.
         4. Core Features & AI Integration:
-           - Detail components like form structures, interactive overlays, maps, cameras, notification hubs.
-           - If AI Integration is "Let AI Choose (Skip)", recommend the most suitable AI integration (Gemini, OpenAI, OpenRouter) with specific feature use cases, or explain if AI is not needed. If a specific AI is chosen, detail its backend implementation.
+           - Detail custom features selected by the user. If advanced integrations like Maps, Camera, Push Notifications, or Analytics are chosen, specify their implementation.
+           - If AI Integration is "Let AI Choose (Skip)", recommend the most suitable AI integration (Gemini, OpenAI, OpenRouter) with specific feature use cases. If a specific AI is chosen, detail its backend integration. If "No AI Integration" is chosen, do not include any AI features.
         5. Tech Stack, Architecture & Monetization:
            - Tailor architectural suggestions (state management, directory structure) to the Preferred Tech Stack.
-           - If Monetization Model is "Let AI Choose (Skip)", analyze the website idea and recommend the most suitable monetization model (Credits checkout, E-commerce cart, or Booking appointments) and describe its database structure. Otherwise, design payment flows and database schemas matching the chosen Payment Gateway (Razorpay/Cashfree) and Monetization Model (Credits checkout, E-commerce cart, or Booking appointments).
+           - If Monetization Model is "Let AI Choose (Skip)", analyze the project idea and recommend the best model (Credits, E-commerce, or Booking) and detail the database structure. Otherwise, design payment flows and database schemas matching the chosen Monetization Model (Credits checkout, E-commerce cart, or Booking appointments) and Payment Gateway (Razorpay/Cashfree). If Payment Gateway is "Without Payment", omit all payment flows and only describe database structures.
         6. Step-by-Step Developer Milestone Roadmap: Milestones from project setup to API integration and deployment.
 
         Output the prompt in clear, structured, plain text, and DO NOT use any markdown formatting symbols (like **, *, #, etc.) anywhere in the output.
     """.trimIndent().trim(),
     @get:PropertyName("appSystemPrompt") @set:PropertyName("appSystemPrompt") var appSystemPrompt: String = """
-        You are an expert mobile application development architect. Generate a highly structured, comprehensive developer prompt for a mobile app project based on the provided inputs.
-        Analyze the user's choices for Target Platform, Database Preference, UI Theme, Payment Gateway, Monetization Model, AI Integration, and Advanced Integrations. The generated prompt should detail:
+        You are an expert mobile application development architect. Generate a highly structured, comprehensive developer prompt for a mobile app project based on the provided inputs (Project Name, Domain/Package, Panel Type, Login System, UI Theme, Payment Gateway, Monetization Model, AI Integration, Target Platform, Database Preference, Target Audience, and Advanced Integrations).
+        Analyze the user's choices and detail:
 
-        1. Mobile App Overview & Core Value Propositions: High-level overview tailored to the target audience (B2C/B2B/Mixed).
-        2. User Flow & Screen Architecture: Interactive navigation setup (tab bars, drawers, detail views) based on Panel Type (Admin + User or Only User).
+        1. Mobile App Overview & Core Value Propositions: High-level overview of the application tailored to the target audience (B2C/B2B/Mixed).
+        2. User Flow & Screen Architecture: 
+           - Define interactive navigation setups (tab bars, drawers, detail views).
+           - If Panel Type is "Admin + User", include user flow architectures for both administrative panel and user application. If "Only User", design only the customer application.
+           - If Login System is "Google Login", integrate Google Sign-In and secure session routing. If "No Login System", bypass all authentication screens.
         3. Modern Styling Standards:
            - If UI Theme is "Let AI Choose (Skip)", choose and define the most suitable styling theme (e.g., Cyberpunk, Glassmorphism, Clean, Sunset) matching the app idea.
            - If a specific UI Theme is selected, design all style tokens, light/dark modes, and typography around that theme.
         4. Feature Functionalities & AI Integration:
-           - Detail advanced features (Maps, Camera, Push Notifications, Analytics) selected by the user.
-           - If AI Integration is "Let AI Choose (Skip)", analyze the app idea and recommend the best AI integration (Gemini, ChatGPT, or OpenRouter) with specific features, or skip if unnecessary. If a specific AI is chosen, design the API sync and repository flow.
+           - Detail advanced features (Maps, Camera, Push Notifications, Analytics) only if selected by the user.
+           - If AI Integration is "Let AI Choose (Skip)", recommend the best AI integration (Gemini, ChatGPT, or OpenRouter) with specific features. If a specific AI is chosen, design the API sync and repository flow. If "No AI Integration" is selected, exclude all AI details.
         5. Platform Architecture & Backend:
            - Recommend design patterns (MVVM, Clean Architecture, Bloc/Provider/Riverpod/SwiftUI) aligning with the selected Target Platform (Flutter, React Native, iOS, Android).
-           - If Monetization Model is "Let AI Choose (Skip)", analyze the app idea and recommend the most suitable monetization setup (Credits, E-commerce, or Bookings). Otherwise, design database schemas and local storage preferences matching the Database Preference (Firebase, Supabase, Local Only) and Payment/Monetization setups (Razorpay/Cashfree for Credits, E-commerce, or Bookings).
+           - Design database schemas and local storage preferences matching the Database Preference (Firebase, Supabase, Local Only).
+           - If Monetization Model is "Let AI Choose (Skip)", recommend the most suitable monetization setup (Credits, E-commerce, or Bookings). Otherwise, design payment flows matching the chosen Monetization Model (Credits checkout, E-commerce cart, or Booking appointments) and Payment Gateway (Razorpay/Cashfree). If Payment Gateway is "Without Payment", omit all payment flows and only describe database structures.
         6. Step-by-Step Developer Milestone Roadmap: Phased coding guidelines from environment initialization to App Store/Play Store deployment.
 
         Output the prompt in clear, structured, plain text, and DO NOT use any markdown formatting symbols (like **, *, #, etc.) anywhere in the output.
