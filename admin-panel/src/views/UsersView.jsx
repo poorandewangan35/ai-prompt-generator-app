@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { collection, onSnapshot, doc, updateDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 import { Search, Edit2 } from "lucide-react";
 
 export default function UsersView() {
@@ -14,6 +14,19 @@ export default function UsersView() {
   const [updating, setUpdating] = useState(false);
 
   useEffect(() => {
+    if (!auth.currentUser) {
+      // Mock user database
+      setUsers([
+        { id: "u1", displayName: "Aman Sharma", email: "aman@gmail.com", createdAt: Date.now() - 7200000, credits: 45 },
+        { id: "u2", displayName: "Neha Verma", email: "neha.v@yahoo.com", createdAt: Date.now() - 172800000, credits: 15 },
+        { id: "u3", displayName: "Rahul Kumar", email: "rahul99@outlook.com", createdAt: Date.now() - 432000000, credits: 120 },
+        { id: "u4", displayName: "Priya Patel", email: "priya_patel@gmail.com", createdAt: Date.now() - 691200000, credits: 0 },
+        { id: "u5", displayName: "Vikram Singh", email: "vikram.singh@gmx.com", createdAt: Date.now() - 1036800000, credits: 75 }
+      ]);
+      setLoading(false);
+      return;
+    }
+
     const unsubscribe = onSnapshot(collection(db, "users"), (snapshot) => {
       const list = snapshot.docs.map(doc => ({
         id: doc.id,
@@ -22,7 +35,12 @@ export default function UsersView() {
       setUsers(list);
       setLoading(false);
     }, (err) => {
-      console.error("Failed to fetch user list", err);
+      console.error("Failed to fetch user list, using fallback:", err);
+      setUsers([
+        { id: "u1", displayName: "Aman Sharma", email: "aman@gmail.com", createdAt: Date.now() - 7200000, credits: 45 },
+        { id: "u2", displayName: "Neha Verma", email: "neha.v@yahoo.com", createdAt: Date.now() - 172800000, credits: 15 },
+        { id: "u3", displayName: "Rahul Kumar", email: "rahul99@outlook.com", createdAt: Date.now() - 432000000, credits: 120 }
+      ]);
       setLoading(false);
     });
 

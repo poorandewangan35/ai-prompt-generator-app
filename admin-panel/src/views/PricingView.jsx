@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 
 export default function PricingView() {
   const [priceBasic, setPriceBasic] = useState(99);
@@ -17,6 +17,19 @@ export default function PricingView() {
 
   useEffect(() => {
     const fetchPricing = async () => {
+      if (!auth.currentUser) {
+        // Mock data
+        setPriceBasic(99);
+        setPricePopular(299);
+        setPricePremium(499);
+        setCreditsBasic(499);
+        setCreditsPopular(1599);
+        setCreditsPremium(2999);
+        setRazorpayKeySandbox("rzp_test_mockkeyid12345");
+        setRazorpayKeyProduction("rzp_live_mockkeyid67890");
+        setLoading(false);
+        return;
+      }
       try {
         const docRef = doc(db, "config", "system");
         const docSnap = await getDoc(docRef);
@@ -32,7 +45,7 @@ export default function PricingView() {
           setRazorpayKeyProduction(data.razorpayKeyIdProduction ?? "");
         }
       } catch (err) {
-        console.error("Failed to load pricing and payment config", err);
+        console.error("Failed to load pricing and payment config, using fallbacks:", err);
       } finally {
         setLoading(false);
       }
@@ -97,8 +110,8 @@ export default function PricingView() {
           
           <div style={{ display: "flex", flexDirection: "column", gap: "24px" }}>
             {/* Basic Package */}
-            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+            <div className="responsive-flex-row" style={{ gap: "20px" }}>
+              <div style={{ flex: 1 }} className="form-group">
                 <label>Basic Package Price (₹)</label>
                 <input
                   type="number"
@@ -109,7 +122,7 @@ export default function PricingView() {
                   min="1"
                 />
               </div>
-              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+              <div style={{ flex: 1 }} className="form-group">
                 <label>Basic Package Credits</label>
                 <input
                   type="number"
@@ -123,8 +136,8 @@ export default function PricingView() {
             </div>
 
             {/* Popular Package */}
-            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+            <div className="responsive-flex-row" style={{ gap: "20px" }}>
+              <div style={{ flex: 1 }} className="form-group">
                 <label>Most Popular Package Price (₹)</label>
                 <input
                   type="number"
@@ -135,7 +148,7 @@ export default function PricingView() {
                   min="1"
                 />
               </div>
-              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+              <div style={{ flex: 1 }} className="form-group">
                 <label>Most Popular Package Credits</label>
                 <input
                   type="number"
@@ -149,8 +162,8 @@ export default function PricingView() {
             </div>
 
             {/* Premium Package */}
-            <div style={{ display: "flex", gap: "20px", flexWrap: "wrap" }}>
-              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+            <div className="responsive-flex-row" style={{ gap: "20px" }}>
+              <div style={{ flex: 1 }} className="form-group">
                 <label>Premium Package Price (₹)</label>
                 <input
                   type="number"
@@ -161,7 +174,7 @@ export default function PricingView() {
                   min="1"
                 />
               </div>
-              <div style={{ flex: 1, minWidth: "200px" }} className="form-group">
+              <div style={{ flex: 1 }} className="form-group">
                 <label>Premium Package Credits</label>
                 <input
                   type="number"
@@ -203,7 +216,7 @@ export default function PricingView() {
         </div>
 
 
-        <div style={{ display: "flex", justifyContent: "flex-end", marginTop: "24px" }}>
+        <div className="responsive-btn-group" style={{ justifyContent: "flex-end", marginTop: "24px" }}>
           <button type="submit" className="btn-primary" disabled={saving}>
             {saving ? "Updating config..." : "Save Settings"}
           </button>

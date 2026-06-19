@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import { doc, getDoc, setDoc } from "firebase/firestore";
-import { db } from "../firebase";
+import { db, auth } from "../firebase";
 
 const DEFAULT_WEBSITE_PROMPT = `You are an expert web development architect. Generate a highly structured, comprehensive developer prompt for a website project based on the provided inputs (Project Name, Domain/Package, Panel Type, Login System, UI Theme, Payment Gateway, Monetization Model, AI Integration, Preferred Tech Stack, and Core Features).
 Analyze the user's choices and detail:
@@ -65,6 +65,15 @@ export default function PromptsView() {
 
   useEffect(() => {
     const fetchConfig = async () => {
+      if (!auth.currentUser) {
+        // Mock data
+        setWebsitePrompt(DEFAULT_WEBSITE_PROMPT);
+        setAppPrompt(DEFAULT_APP_PROMPT);
+        setOpenRouterApiKey("sk-or-v1-mockapikey1234567890");
+        setOpenRouterModel("google/gemini-2.0-flash-lite:free");
+        setLoading(false);
+        return;
+      }
       try {
         const docRef = doc(db, "config", "system");
         const docSnap = await getDoc(docRef);
@@ -76,7 +85,7 @@ export default function PromptsView() {
           setOpenRouterModel(data.openRouterModel || "google/gemini-2.0-flash-lite:free");
         }
       } catch (err) {
-        console.error("Failed to load prompt configs", err);
+        console.error("Failed to load prompt configs, using fallbacks:", err);
       } finally {
         setLoading(false);
       }
@@ -206,7 +215,7 @@ export default function PromptsView() {
 
           <div className="form-group">
             <label>AI Model (OpenRouter)</label>
-            <div style={{ display: "flex", gap: "10px", alignItems: "center" }}>
+            <div className="responsive-flex-row" style={{ gap: "10px" }}>
               <input
                 type="text"
                 className="form-control"
@@ -293,7 +302,7 @@ export default function PromptsView() {
             />
           </div>
 
-          <div style={{ display: "flex", justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
+          <div className="responsive-btn-group" style={{ justifyContent: "flex-end", gap: "12px", marginTop: "24px" }}>
             <button
               type="button"
               className="btn-secondary"
