@@ -35,6 +35,7 @@ import com.aipromptgenerater.aitricker.theme.ThemeManager
 @Composable
 fun ProfileScreen(
     onNavigateToWallet: () -> Unit,
+    onNavigateToPaymentHistory: () -> Unit,
     viewModel: ProfileViewModel = viewModel { ProfileViewModel() }
 ) {
     val context = LocalContext.current
@@ -231,6 +232,13 @@ fun ProfileScreen(
                     icon = Icons.Default.Help,
                     title = "Help & Support",
                     onClick = { showHelpDialog = true }
+                )
+
+                // Payment History item
+                SettingsRow(
+                    icon = Icons.Default.ReceiptLong,
+                    title = "Payment History",
+                    onClick = onNavigateToPaymentHistory
                 )
 
                 // Privacy/Security item

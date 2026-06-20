@@ -10,6 +10,7 @@ import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
 import androidx.compose.material.icons.filled.CheckCircle
+import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.ShoppingCart
 import androidx.compose.material3.*
 import androidx.compose.runtime.*
@@ -31,6 +32,7 @@ import com.aipromptgenerater.aitricker.ui.components.PremiumCard
 @Composable
 fun WalletScreen(
     onNavigateBack: () -> Unit,
+    onNavigateToPaymentHistory: () -> Unit,
     viewModel: WalletViewModel = viewModel { WalletViewModel() }
 ) {
     val context = LocalContext.current
@@ -54,6 +56,11 @@ fun WalletScreen(
                 navigationIcon = {
                     IconButton(onClick = onNavigateBack) {
                         Icon(imageVector = Icons.Default.ArrowBack, contentDescription = "Back")
+                    }
+                },
+                actions = {
+                    IconButton(onClick = onNavigateToPaymentHistory) {
+                        Icon(imageVector = Icons.Default.History, contentDescription = "Payment History")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(containerColor = MaterialTheme.colorScheme.background)

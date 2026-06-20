@@ -21,6 +21,7 @@ import com.aipromptgenerater.aitricker.ui.generator.GeneratorScreen
 import com.aipromptgenerater.aitricker.ui.history.HistoryScreen
 import com.aipromptgenerater.aitricker.ui.home.HomeScreen
 import com.aipromptgenerater.aitricker.ui.wallet.WalletScreen
+import com.aipromptgenerater.aitricker.ui.wallet.PaymentHistoryScreen
 import com.aipromptgenerater.aitricker.ui.profile.ProfileScreen
 
 @Composable
@@ -134,7 +135,8 @@ fun MainNavigation(
                                     backStack.clear()
                                     backStack.add(Home)
                                 }
-                            }
+                            },
+                            onNavigateToPaymentHistory = { backStack.add(PaymentHistory) }
                         )
                     }
                     entry<History> {
@@ -151,7 +153,20 @@ fun MainNavigation(
                     }
                     entry<Profile> {
                         ProfileScreen(
-                            onNavigateToWallet = { backStack.add(Wallet) }
+                            onNavigateToWallet = { backStack.add(Wallet) },
+                            onNavigateToPaymentHistory = { backStack.add(PaymentHistory) }
+                        )
+                    }
+                    entry<PaymentHistory> {
+                        PaymentHistoryScreen(
+                            onNavigateBack = {
+                                if (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                } else {
+                                    backStack.clear()
+                                    backStack.add(Home)
+                                }
+                            }
                         )
                     }
                 }

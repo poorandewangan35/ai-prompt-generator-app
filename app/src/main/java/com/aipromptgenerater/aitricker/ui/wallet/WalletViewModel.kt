@@ -37,6 +37,18 @@ class WalletViewModel(
         }
         .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), null)
 
+    @OptIn(ExperimentalCoroutinesApi::class)
+    val paymentHistory: StateFlow<List<Map<String, Any>>> = currentUser
+        .flatMapLatest { user ->
+            if (user != null) {
+                paymentRepository.getReceiptsFlow(user.uid)
+                    .catch { emit(emptyList()) }
+            } else {
+                flowOf(emptyList())
+            }
+        }
+        .stateIn(viewModelScope, SharingStarted.WhileSubscribed(5000), emptyList())
+
     init {
         loadPlans()
     }

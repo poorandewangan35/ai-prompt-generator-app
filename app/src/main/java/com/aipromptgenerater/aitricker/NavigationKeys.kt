@@ -17,3 +17,6 @@ data object History : NavKey
 
 @Serializable
 data object Profile : NavKey
+
+@Serializable
+data object PaymentHistory : NavKey

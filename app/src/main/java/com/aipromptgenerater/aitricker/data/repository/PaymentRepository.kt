@@ -8,6 +8,9 @@ import com.aipromptgenerater.aitricker.data.remote.RazorpayClient
 import com.aipromptgenerater.aitricker.data.remote.RazorpayResultBridge
 import com.google.firebase.auth.FirebaseAuth
 import com.google.firebase.firestore.FirebaseFirestore
+import kotlinx.coroutines.channels.awaitClose
+import kotlinx.coroutines.flow.Flow
+import kotlinx.coroutines.flow.callbackFlow
 import kotlinx.coroutines.tasks.await
 import java.util.UUID
 
@@ -157,5 +160,30 @@ class PaymentRepository(
             Log.e(TAG, "Payment verification transaction failed", e)
             onFailure("Failed to secure credits: ${e.message}")
         }
+    }
+
+    /**
+     * Listens to payment receipt changes in Firestore and returns sorted results in real-time.
+     * Memory sorting avoids needing a Firestore composite index.
+     */
+    fun getReceiptsFlow(userId: String): Flow<List<Map<String, Any>>> = callbackFlow {
+        val query = firestore.collection("receipts")
+            .whereEqualTo("userId", userId)
+
+        val registration = query.addSnapshotListener { snapshot, error ->
+            if (error != null) {
+                Log.e(TAG, "Error fetching receipts", error)
+                close(error)
+                return@addSnapshotListener
+            }
+            if (snapshot != null) {
+                val list = snapshot.documents.mapNotNull { it.data }
+                    .sortedByDescending { it["timestamp"] as? Long ?: 0L }
+                trySend(list)
+            } else {
+                trySend(emptyList())
+            }
+        }
+        awaitClose { registration.remove() }
     }
 }
