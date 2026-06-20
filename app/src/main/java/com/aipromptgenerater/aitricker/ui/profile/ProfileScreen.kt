@@ -200,6 +200,13 @@ fun ProfileScreen(
                     showCopy = true,
                     context = context
                 )
+
+                // Payment History item
+                SettingsRow(
+                    icon = Icons.Default.ReceiptLong,
+                    title = "Payment History",
+                    onClick = onNavigateToPaymentHistory
+                )
             }
 
             // 4. App settings & utility list
@@ -232,13 +239,6 @@ fun ProfileScreen(
                     icon = Icons.Default.Help,
                     title = "Help & Support",
                     onClick = { showHelpDialog = true }
-                )
-
-                // Payment History item
-                SettingsRow(
-                    icon = Icons.Default.ReceiptLong,
-                    title = "Payment History",
-                    onClick = onNavigateToPaymentHistory
                 )
 
                 // Privacy/Security item
