@@ -145,6 +145,7 @@ class PaymentRepository(
             val userSnapshot = transaction.get(userDocRef)
             val currentCredits = userSnapshot.getLong("credits")?.toInt() ?: 0
             transaction.update(userDocRef, "credits", currentCredits + creditsToAdd)
+            transaction.update(userDocRef, "lastReceiptId", receiptId)
 
             // Write purchase verification record
             val receiptDocRef = firestore.collection("receipts").document(receiptId)

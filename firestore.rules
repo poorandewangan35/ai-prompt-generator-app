@@ -31,7 +31,15 @@ service cloud.firestore {
           request.auth.uid == userId && 
           (
             request.resource.data.credits == resource.data.credits - 5 ||
-            request.resource.data.credits == resource.data.credits
+            request.resource.data.credits == resource.data.credits ||
+            (
+              request.resource.data.credits > resource.data.credits &&
+              request.resource.data.lastReceiptId != null &&
+              existsAfter(/databases/$(database)/documents/receipts/$(request.resource.data.lastReceiptId)) &&
+              getAfter(/databases/$(database)/documents/receipts/$(request.resource.data.lastReceiptId)).data.userId == userId &&
+              getAfter(/databases/$(database)/documents/receipts/$(request.resource.data.lastReceiptId)).data.creditsPurchased == request.resource.data.credits - resource.data.credits &&
+              getAfter(/databases/$(database)/documents/receipts/$(request.resource.data.lastReceiptId)).data.status == 'SUCCESS'
+            )
           )
         )
       );
@@ -58,7 +66,9 @@ service cloud.firestore {
     // Payment receipts: users can read their own payment logs, admins can read all
     match /receipts/{receiptId} {
       allow read: if request.auth != null && (resource.data.userId == request.auth.uid || isAdmin());
-      allow create: if false; // Fulfilling payments must occur via secure Cloud Function or verified Sandbox API transaction
+      allow create: if request.auth != null 
+        && request.resource.data.userId == request.auth.uid
+        && request.resource.data.status == 'SUCCESS';
     }
   }
 }
