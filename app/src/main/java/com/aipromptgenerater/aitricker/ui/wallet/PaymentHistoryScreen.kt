@@ -146,14 +146,16 @@ fun ReceiptHistoryCard(
     // Determine plan type label based on credits added
     val planLabel = when (credits) {
         499 -> "Basic Plan"
+        199 -> "Basic Plan"
         1599 -> "Most Popular"
         2999 -> "Premium Creator"
         else -> "Credit Package"
     }
 
-    // Estimate price based on plan credits
-    val price = when (credits) {
+    // Retrieve pricePaid if available, else estimate based on plan credits
+    val price = (receipt["pricePaid"] as? Number)?.toInt() ?: when (credits) {
         499 -> 99
+        199 -> 99
         1599 -> 299
         2999 -> 499
         else -> 0
@@ -256,13 +258,15 @@ fun ReceiptDetailsDialog(
 
     val planLabel = when (credits) {
         499 -> "Basic Plan"
+        199 -> "Basic Plan"
         1599 -> "Most Popular"
         2999 -> "Premium Creator"
         else -> "Credit Package"
     }
 
-    val price = when (credits) {
+    val price = (receipt["pricePaid"] as? Number)?.toInt() ?: when (credits) {
         499 -> 99
+        199 -> 99
         1599 -> 299
         2999 -> 499
         else -> 0

@@ -92,7 +92,7 @@ class PaymentRepository(
             // Setup SDK callback bridges
             RazorpayResultBridge.onSuccess = { paymentId ->
                 Log.i(TAG, "Razorpay payment success event for: $paymentId")
-                verifyAndFulfillPayment(userId, paymentId, plan.credits, onSuccess, onFailure)
+                verifyAndFulfillPayment(userId, paymentId, plan.credits, plan.price, onSuccess, onFailure)
             }
 
             RazorpayResultBridge.onFailure = { code, response ->
@@ -125,6 +125,7 @@ class PaymentRepository(
         userId: String,
         orderId: String,
         creditsToAdd: Int,
+        pricePaid: Int,
         onSuccess: (String) -> Unit,
         onFailure: (String) -> Unit
     ) {
@@ -137,6 +138,7 @@ class PaymentRepository(
             "orderId" to orderId,
             "userId" to userId,
             "creditsPurchased" to creditsToAdd,
+            "pricePaid" to pricePaid,
             "timestamp" to System.currentTimeMillis(),
             "status" to "SUCCESS",
             "gateway" to "Razorpay"
