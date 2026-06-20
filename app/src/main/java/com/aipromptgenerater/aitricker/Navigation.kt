@@ -94,7 +94,14 @@ fun MainNavigation(
         ) { innerPadding ->
             NavDisplay(
                 backStack = backStack,
-                onBack = { backStack.removeLastOrNull() },
+                onBack = {
+                    if (backStack.size > 1) {
+                        backStack.removeLastOrNull()
+                    } else if (backStack.lastOrNull() != Home) {
+                        backStack.clear()
+                        backStack.add(Home)
+                    }
+                },
                 modifier = Modifier
                     .fillMaxSize()
                     .padding(innerPadding),
@@ -108,17 +115,38 @@ fun MainNavigation(
                     entry<Generator> { key ->
                         GeneratorScreen(
                             generatorType = key.type,
-                            onNavigateBack = { backStack.removeLastOrNull() }
+                            onNavigateBack = {
+                                if (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                } else {
+                                    backStack.clear()
+                                    backStack.add(Home)
+                                }
+                            }
                         )
                     }
                     entry<Wallet> {
                         WalletScreen(
-                            onNavigateBack = { backStack.removeLastOrNull() }
+                            onNavigateBack = {
+                                if (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                } else {
+                                    backStack.clear()
+                                    backStack.add(Home)
+                                }
+                            }
                         )
                     }
                     entry<History> {
                         HistoryScreen(
-                            onNavigateBack = { backStack.removeLastOrNull() }
+                            onNavigateBack = {
+                                if (backStack.size > 1) {
+                                    backStack.removeLastOrNull()
+                                } else {
+                                    backStack.clear()
+                                    backStack.add(Home)
+                                }
+                            }
                         )
                     }
                     entry<Profile> {

@@ -44,7 +44,6 @@ fun WalletScreen(
         if (paymentState is PaymentState.Success) {
             Toast.makeText(context, (paymentState as PaymentState.Success).message, Toast.LENGTH_LONG).show()
             viewModel.resetState()
-            onNavigateBack()
         }
     }
 
